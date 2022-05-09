@@ -1,29 +1,46 @@
-#########################################
+#######################################################
 #
-# GSOCmap v2 & GSOCseq V2 | Module I
-# SOC map and Clay layer preparation 
-# Covariates
+#  Process and dowload 22 covariates
+#  from GEE to R (10 minutes to execute)
 #
 # GSP-Secretariat
 # Contact: Isabel.Luotto@fao.org
 #
-#########################################
+#######################################################
+
 #Empty environment and cache ----
 rm(list = ls());
 gc()
 
+#######################################################
+#
+#  User defined variables:
+
+# Working directory
+ wd <- 'C:/Users/luottoi/Documents/GitHub/Digital-Soil-Mapping'
+
+# Area of interest
+ AOI <- '01-Data/MKD.shp'
+#Start and End time 
+ start_T <- "2017-01-01"
+ end_T <- "2017-12-31"
+#
+#
+ #######################################################
+ 
+  
 # Load libraries ----
 library(data.table)
 library(terra)
 library(sf)
 library(rgee)
 # Set working directory Module I ----
-wd <- 'C:/Users/luottoi/Documents/GitHub/Digital-Soil-Mapping'
+
 
 setwd(wd)
 
 # Country shapefile
-AOI <- read_sf('01-Data/MKD.shp')
+AOI <- read_sf(AOI)
 
 
 #List of covariates to prepare
@@ -48,14 +65,14 @@ region = region$geometry()
 
 
 image1 <- ee$ImageCollection("IDAHO_EPSCOR/TERRACLIMATE") %>%
-  ee$ImageCollection$filterDate("2017-01-01", "2017-12-31") %>%
+  ee$ImageCollection$filterDate(start_T, end_T) %>%
   ee$ImageCollection$select("tmmx")%>%
   ee$ImageCollection$filterBounds(region)%>%
   ee$ImageCollection$toBands()
 
   # from imagecollection to image
 image2 <- ee$ImageCollection("IDAHO_EPSCOR/TERRACLIMATE") %>%
-  ee$ImageCollection$filterDate("2017-01-01", "2017-12-31") %>%
+  ee$ImageCollection$filterDate(start_T, end_T) %>%
   ee$ImageCollection$select("tmmx")%>%
   ee$ImageCollection$toBands()
 
@@ -78,18 +95,13 @@ avtr <- ee_as_raster(
 writeRaster(avtr, '01-Data/covs/avtr.tif', overwrite=T)
 
 # Total annual Precipitation ----
-ee_Initialize()
-
-
 
 image <- ee$ImageCollection("IDAHO_EPSCOR/TERRACLIMATE") %>%
-  ee$ImageCollection$filterDate("2017-01-01", "2017-12-31") %>%
+  ee$ImageCollection$filterDate(start_T, end_T) %>%
   ee$ImageCollection$select("pr")%>%
   ee$ImageCollection$filterBounds(region)%>%
   ee$ImageCollection$sum()%>%
   ee$Image$toDouble()
-
-
 
 
 Prr <- ee_as_raster(
@@ -103,7 +115,7 @@ writeRaster(Prr, '01-Data/covs/Prr.tif', overwrite=T)
 
 # Precipitation of wettest month ----
 image <- ee$ImageCollection("IDAHO_EPSCOR/TERRACLIMATE") %>%
-  ee$ImageCollection$filterDate("2017-01-01", "2017-12-31") %>%
+  ee$ImageCollection$filterDate(start_T, end_T) %>%
   ee$ImageCollection$select("pr")%>%
   ee$ImageCollection$filterBounds(region)%>%
   ee$ImageCollection$toBands()
@@ -167,13 +179,13 @@ writeRaster(tagee_test, '01-Data/covs/Terrain_attributes.tif', overwrite=T)
 
 # EVI & NDVI ----
 EVI <- ee$ImageCollection("MODIS/061/MOD13Q1") %>%
-  ee$ImageCollection$filterDate("2017-01-01", "2017-12-31") %>%
+  ee$ImageCollection$filterDate(start_T, end_T) %>%
   ee$ImageCollection$select("EVI")%>%
   ee$ImageCollection$filterBounds(region)%>%
   ee$ImageCollection$toBands()
 
 NDVI <- ee$ImageCollection("MODIS/061/MOD13Q1") %>%
-  ee$ImageCollection$filterDate("2017-01-01", "2017-12-31") %>%
+  ee$ImageCollection$filterDate(start_T, end_T) %>%
   ee$ImageCollection$select("NDVI")%>%
   ee$ImageCollection$filterBounds(region)%>%
   ee$ImageCollection$toBands()
@@ -218,7 +230,7 @@ sd_d_Tr <- ee_as_raster(
 
 writeRaster(sd_d_Tr, '01-Data/covs/sd_d_Tr.tif', overwrite=T)
 
-# Landsat bands mean and sd 
+# Landsat bands mean and sd ----
 image <- ee$ImageCollection("LANDSAT/LC08/C02/T1_RT") %>%
   ee$ImageCollection$filterDate("2018-01-01", "2018-12-31") %>%
   ee$ImageCollection$select(c("B4"))%>%
@@ -234,6 +246,8 @@ land_sd_red <- ee_as_raster(
   region = region,
   via = "drive"
 )
+
+writeRaster(land_sd_red, '01-Data/covs/land_sd_red.tif', overwrite=T)
 
 image <- ee$ImageCollection("LANDSAT/LC08/C02/T1_RT") %>%
   ee$ImageCollection$filterDate("2018-01-01", "2018-12-31") %>%
