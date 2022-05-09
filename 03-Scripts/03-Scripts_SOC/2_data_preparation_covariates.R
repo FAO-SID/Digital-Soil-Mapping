@@ -8,7 +8,7 @@ rm(list = ls());
 gc()
 
 # Set working directory
-setwd("C:/Users/hp/Documents/FAO/EduSoils/training_material")
+setwd("C:/Users/luottoi/Documents/GitHub/Digital-Soil-Mapping")
 
 #####################################  Import and stack the covariates ########################################
 library (sp)
@@ -17,7 +17,11 @@ library(raster)
 # list all .tif files the 'covs' folder and load them in a raster stack.
 # all rasters should have same extent, resoultion and coordinate system
 files <- list.files(path = "01-Data/covs", pattern = "tif*$", full.names = TRUE)
-covs <- stack(files)
+
+
+# Terrain attributes
+tr <- stack(files[10])
+
 
 # Explore the data
 names(covs)

@@ -1,6 +1,6 @@
 #######################################################
 #
-#  Process and dowload 22 covariates
+#  Process and download 22 covariates
 #  from GEE to R (10 minutes to execute)
 #
 # GSP-Secretariat
@@ -24,6 +24,9 @@ gc()
 #Start and End time 
  start_T <- "2017-01-01"
  end_T <- "2017-12-31"
+ 
+# Resolution (CRS defined based on the first TerraClimate layer WGS84 )
+ res = 1000
 #
 #
  #######################################################
@@ -41,6 +44,8 @@ setwd(wd)
 
 # Country shapefile
 AOI <- read_sf(AOI)
+
+
 
 
 #List of covariates to prepare
@@ -84,10 +89,17 @@ diff <- image1$add(image2)
 avT = diff$divide(2)
 avT = avT$reduce(ee$Reducer$mean())
 
+proj = avT$projection()$getInfo()
+
+crs = proj$wkt
+
+avT = avT$resample('bilinear')$reproject(
+  crs= crs,
+  scale= res)
 
 avtr <- ee_as_raster(
   image = avT,
-  scale= 4000,
+  scale= res,
   region = region,
   via = "drive"
 )
@@ -103,13 +115,19 @@ image <- ee$ImageCollection("IDAHO_EPSCOR/TERRACLIMATE") %>%
   ee$ImageCollection$sum()%>%
   ee$Image$toDouble()
 
+Pr = image$resample('bilinear')$reproject(
+  crs= crs,
+  scale= res)
+
 
 Prr <- ee_as_raster(
-  image = image,
-  scale= 4000,
+  image = Pr,
+  scale= res,
   region = region,
   via = "drive"
 )
+
+
 
 writeRaster(Prr, '01-Data/covs/Prr.tif', overwrite=T)
 
@@ -120,10 +138,14 @@ image <- ee$ImageCollection("IDAHO_EPSCOR/TERRACLIMATE") %>%
   ee$ImageCollection$filterBounds(region)%>%
   ee$ImageCollection$toBands()
 
+image = image$resample('bilinear')$reproject(
+  crs= crs,
+  scale= res)
+
 
 Prr_all <- ee_as_raster(
   image = image,
-  scale= 4000,
+  scale= res,
   region = region,
   via = "drive"
 )
@@ -142,21 +164,21 @@ Prr_dry <- Prr_all[[dryest]]
 writeRaster(Prr_wet, '01-Data/covs/Prr_dry.tif', overwrite=T)
 
 
-# Terrain attributes using TAGEE 13 covariates
+# Terrain attributes using TAGEE - 13 covariates
 # Attribute	| Unit	| Description
 # Elevation  |	meter	|Height of terrain above sea level
 # Slope	degree	| Slope |  gradient
-# Aspect |	degree	Compass direction
-# Hillshade	| dimensionless	Brightness of the illuminated terrain
-# Northness |	dimensionless	Degree of orientation to North
-# Eastness	| dimensionless	Degree of orientation to East
-# Horizontal curvature |	meter	Curvature tangent to the contour line
-# Vertical curvature |	meter	Curvature tangent to the slope line
-# Mean curvature |	meter	Half-sum of the two orthogonal curvatures
+# Aspect |	degree |	Compass direction
+# Hillshade	| dimensionless	|Brightness of the illuminated terrain
+# Northness |	dimensionless |	Degree of orientation to North
+# Eastness	| dimensionless |	Degree of orientation to East
+# Horizontal curvature |	meter |	Curvature tangent to the contour line
+# Vertical curvature |	meter	| Curvature tangent to the slope line
+# Mean curvature |	meter	| Half-sum of the two orthogonal curvatures
 # Minimal curvature	meter |	Lowest value of curvature
 # Maximal curvature	meter |	Highest value of curvature
-# Gaussian curvature	 | meter	Product of maximal and minimal curvatures
-# Shape Index	| dimensionless	Continuous form of the Gaussian landform classification
+# Gaussian curvature	 | meter |	Product of maximal and minimal curvatures
+# Shape Index	| dimensionless |	Continuous form of the Gaussian landform classification
 
 
 TAGEE <- import("tagee")
@@ -165,12 +187,16 @@ image <- ee$Image("MERIT/DEM/v1_0_3") %>%
   ee$Image$clip(region)%>%
   ee$Image$toDouble()
 
+image = image$resample('bilinear')$reproject(
+  crs= crs,
+  scale= res)
 
 DEMAttributes = TAGEE$terrainAnalysis( image, region)
 
+
 tagee_test <- ee_as_raster(
   image = DEMAttributes,
-  scale= 1000,
+  scale= res,
   region = region,
   via = "drive"
 )
@@ -184,22 +210,30 @@ EVI <- ee$ImageCollection("MODIS/061/MOD13Q1") %>%
   ee$ImageCollection$filterBounds(region)%>%
   ee$ImageCollection$toBands()
 
+EVI = EVI$resample('bilinear')$reproject(
+  crs= crs,
+  scale= res)
+
 NDVI <- ee$ImageCollection("MODIS/061/MOD13Q1") %>%
   ee$ImageCollection$filterDate(start_T, end_T) %>%
   ee$ImageCollection$select("NDVI")%>%
   ee$ImageCollection$filterBounds(region)%>%
   ee$ImageCollection$toBands()
 
+NDVI = NDVI$resample('bilinear')$reproject(
+  crs= crs,
+  scale= res)
+
 ndvir <- ee_as_raster(
   image = NDVI,
-  scale= 1000,
+  scale= res,
   region = region,
   via = "drive"
 )
 
 evir <- ee_as_raster(
   image = EVI,
-  scale= 1000,
+  scale= res,
   region = region,
   via = "drive"
 )
@@ -219,10 +253,13 @@ image <- ee$ImageCollection("MODIS/061/MOD11A1") %>%
 d_T = image$subtract(273.15)
 sd_d_T = d_T$reduce(ee$Reducer$stdDev())
 
+sd_d_T = sd_d_T$resample('bilinear')$reproject(
+  crs= crs,
+  scale= res)
 
 sd_d_Tr <- ee_as_raster(
   image = sd_d_T,
-  scale= 1000,
+  scale= res,
   region = region,
   via = "drive"
 )
@@ -240,9 +277,13 @@ image <- ee$ImageCollection("LANDSAT/LC08/C02/T1_RT") %>%
 
 land_red = image$reduce(ee$Reducer$stdDev())
 
+land_red = land_red$resample('bilinear')$reproject(
+  crs= crs,
+  scale= res)
+
 land_sd_red <- ee_as_raster(
   image = land_red,
-  scale= 1000,
+  scale= res,
   region = region,
   via = "drive"
 )
@@ -257,10 +298,13 @@ image <- ee$ImageCollection("LANDSAT/LC08/C02/T1_RT") %>%
 
 
 land_nir = image$reduce(ee$Reducer$stdDev())
+land_nir = land_nir$resample('bilinear')$reproject(
+  crs= crs,
+  scale= res)
 
 land_nirr <- ee_as_raster(
   image = land_nir,
-  scale= 1000,
+  scale= res,
   region = region,
   via = "drive"
 )
