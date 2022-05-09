@@ -210,6 +210,8 @@ EVI <- ee$ImageCollection("MODIS/061/MOD13Q1") %>%
   ee$ImageCollection$filterBounds(region)%>%
   ee$ImageCollection$toBands()
 
+EVI = EVI$reduce(ee$Reducer$mean())
+
 EVI = EVI$resample('bilinear')$reproject(
   crs= crs,
   scale= res)
@@ -219,6 +221,8 @@ NDVI <- ee$ImageCollection("MODIS/061/MOD13Q1") %>%
   ee$ImageCollection$select("NDVI")%>%
   ee$ImageCollection$filterBounds(region)%>%
   ee$ImageCollection$toBands()
+
+NDVI = NDVI$reduce(ee$Reducer$mean())
 
 NDVI = NDVI$resample('bilinear')$reproject(
   crs= crs,

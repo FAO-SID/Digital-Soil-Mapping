@@ -19,8 +19,7 @@ library(raster)
 files <- list.files(path = "01-Data/covs", pattern = "tif*$", full.names = TRUE)
 
 
-# Terrain attributes
-tr <- stack(files[10])
+covs <- stack(files)
 
 
 # Explore the data
