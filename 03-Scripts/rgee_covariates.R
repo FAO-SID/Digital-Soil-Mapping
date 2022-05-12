@@ -17,8 +17,9 @@ gc()
 #  User defined variables:
 
 # Working directory
- wd <- 'C:/Users/luottoi/Documents/GitHub/Digital-Soil-Mapping'
-
+# wd <- 'C:/Users/luottoi/Documents/GitHub/Digital-Soil-Mapping'
+ wd <- 'C:/Users/hp/Documents/GitHub/Digital-Soil-Mapping'
+ 
 # Area of interest
  AOI <- '01-Data/MKD.shp'
 #Start and End time 
@@ -62,6 +63,8 @@ AOI <- read_sf(AOI)
 
 # Landsat 8 RED and NIR standard deviation
 
+# OpenLandMap soil water conten 0-10-30
+
 # Mean annual temperature (daytime) ----
 ee_Initialize()
 
@@ -78,7 +81,7 @@ image1 <- ee$ImageCollection("IDAHO_EPSCOR/TERRACLIMATE") %>%
   # from imagecollection to image
 image2 <- ee$ImageCollection("IDAHO_EPSCOR/TERRACLIMATE") %>%
   ee$ImageCollection$filterDate(start_T, end_T) %>%
-  ee$ImageCollection$select("tmmx")%>%
+  ee$ImageCollection$select("tmmn")%>%
   ee$ImageCollection$toBands()
 
 
@@ -315,3 +318,26 @@ land_nirr <- ee_as_raster(
 
 writeRaster(land_nirr, '01-Data/covs/land_sd_nir.tif', overwrite=T)
 
+# OpenLandMap soil water conten 0-10-30 ----
+
+image <- ee$Image("OpenLandMap/SOL/SOL_WATERCONTENT-33KPA_USDA-4B1C_M/v01") %>%
+  ee$Image$select(c('b0','b10','b30'))%>%
+  ee$Image$clip(region)
+
+soil_wt = image$resample('bilinear')$reproject(
+  crs= crs,
+  scale= res)
+
+soil_wtr <- ee_as_raster(
+  image = soil_wt,
+  scale= res,
+  region = region,
+  via = "drive"
+)
+
+#Harmonize to 0-30 depth with a weighted average
+WeightedAverage<-function(r){return(r[[1]]*(1/30)+r[[2]]*(9/30)+r[[3]]*(20/30))}
+
+soil_wtr<-overlay(soil_wtr,fun=WeightedAverage)
+
+writeRaster(soil_wtr, '01-Data/covs/soil_wtr.tif', overwrite=T)

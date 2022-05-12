@@ -13,6 +13,7 @@ setwd("C:/Users/hp/Documents/GitHub/Digital-Soil-Mapping/")
 #####################################  Import and stack the covariates ########################################
 library (sp)
 library(raster)
+library(factoextra)
 
 # list all .tif files the 'covs' folder and load them in a raster stack.
 # all rasters should have same extent, resoultion and coordinate system
@@ -47,23 +48,9 @@ summary(dat)
 dat<-as.data.frame(dat)
 dat <- dat[complete.cases(dat),]
 
-# Test correlation between each covariate and the 'OCSKGMlog'
-names(dat)
-test_covs <- cor(x = as.matrix(dat[,9]),
-                     y = as.matrix(dat[,c(10:32)]))
-test_covs 
+#Perform PCA to select covariates
 
-# Select only the covariates that have correlation higher than 0.3
-library(reshape)
 
-x <- subset(melt(test_covs), value != 1 | value != NA)
-x <- x[with(x, order(-abs(x$value))),]
-(x <- subset(x,abs(x$value)>0.20))
-selection <- as.character(x$X2)
-
-# Leave only selected covariates in the 'covs' raster stack
-covs <- covs[[selection]]
-names(covs)
 
 ############################################### Add categorical covariates #########################################
 

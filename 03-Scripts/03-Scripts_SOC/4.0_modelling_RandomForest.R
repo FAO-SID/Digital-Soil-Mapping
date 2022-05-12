@@ -8,13 +8,16 @@ rm(list = ls());
 gc()
 
 # Set working directory
-setwd("C:/Users/hp/Documents/FAO/EduSoils/training_material")
+setwd("C:/Users/hp/Documents/GitHub/Digital-Soil-Mapping")
 
 ############################### Prapare the final table for modelling (regression matrix) ########################
 
 # Load the covariates stack. It was was prepared in the 'data_preparation_covariates' script
+
 load(file = "02-Outputs/covariates.RData")
 names(covs)
+
+covs <- covs[[-4]]
 
 # Load the processed data for digital soil mapping. This table was prepared in the 'data_preparation_profiles' script
 dat <- read.csv("02-Outputs/dat_train.csv")
@@ -74,6 +77,6 @@ pred <- exp(pred)
 
 # Explore and save the result as a tiff file
 plot(pred)
-writeRaster(pred, filename = "02-Outputs/Final Maps/MKD_OCS_RF.tif",
+writeRaster(pred, filename = "02-Outputs/Final Maps/MKD_OCS_RF_nc.tif",
             overwrite=TRUE)
 
