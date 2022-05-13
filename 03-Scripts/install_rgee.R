@@ -33,6 +33,7 @@ library(pacman)
 # pip install google-api-python-client
 # pip install earthengine-api
 # pip install numpy
+# pip install tagee
 
 ## ok conda should now be installed, now lets get the path to the environment, type inside anaconda:
 # conda env list

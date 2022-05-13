@@ -50,7 +50,7 @@ dat <- dat[complete.cases(dat),]
 # Test correlation between each covariate and the 'OCSKGMlog'
 names(dat)
 test_covs <- cor(x = as.matrix(dat[,9]),
-                     y = as.matrix(dat[,c(10:32)]))
+                     y = as.matrix(dat[,c(10:33)]))
 test_covs 
 
 # Select only the covariates that have correlation higher than 0.3

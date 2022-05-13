@@ -63,7 +63,15 @@ AOI <- read_sf(AOI)
 
 # Landsat 8 RED and NIR standard deviation
 
-# OpenLandMap soil water conten 0-10-30
+# OpenLandMap 
+# soil water content 0-10-30
+# Potential FAPAR Monthly
+
+
+# Multi-Scale Topographic Position Index
+
+
+
 
 # Mean annual temperature (daytime) ----
 ee_Initialize()
@@ -318,7 +326,7 @@ land_nirr <- ee_as_raster(
 
 writeRaster(land_nirr, '01-Data/covs/land_sd_nir.tif', overwrite=T)
 
-# OpenLandMap soil water conten 0-10-30 ----
+# OpenLandMap soil water content 0-10-30 ----
 
 image <- ee$Image("OpenLandMap/SOL/SOL_WATERCONTENT-33KPA_USDA-4B1C_M/v01") %>%
   ee$Image$select(c('b0','b10','b30'))%>%
@@ -341,3 +349,45 @@ WeightedAverage<-function(r){return(r[[1]]*(1/30)+r[[2]]*(9/30)+r[[3]]*(20/30))}
 soil_wtr<-overlay(soil_wtr,fun=WeightedAverage)
 
 writeRaster(soil_wtr, '01-Data/covs/soil_wtr.tif', overwrite=T)
+
+# OpenLandMap Potential FAPAR Monthly ----
+
+image <- ee$Image("OpenLandMap/PNV/PNV_FAPAR_PROBA-V_D/v01") %>%
+  ee$Image$select(c('jan','feb','mar','apr','may','jun','jul',
+                   'aug','sep','oct','nov','dec' ))%>%
+  ee$Image$clip(region)
+
+fapar = image$resample('bilinear')$reproject(
+  crs= crs,
+  scale= res)
+
+fapar=fapar$reduce(ee$Reducer$mean())
+
+faparr <- ee_as_raster(
+  image = fapar,
+  scale= res,
+  region = region,
+  via = "drive"
+)
+
+writeRaster(faparr, '01-Data/covs/faparr_mean.tif', overwrite=T)
+
+
+
+# Multi-Scale Topographic Position Index ----
+image <- ee$Image("CSP/ERGo/1_0/Global/ALOS_mTPI") %>%
+  ee$Image$select('AVE')%>%
+  ee$Image$clip(region)
+
+top_pos = image$resample('bilinear')$reproject(
+  crs= crs,
+  scale= res)
+
+top_posr <- ee_as_raster(
+  image = top_pos,
+  scale= res,
+  region = region,
+  via = "drive"
+)
+
+writeRaster(top_posr, '01-Data/covs/top_posr.tif', overwrite=T)
