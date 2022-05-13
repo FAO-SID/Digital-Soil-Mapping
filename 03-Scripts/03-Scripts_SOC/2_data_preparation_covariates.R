@@ -50,7 +50,7 @@ dat <- dat[complete.cases(dat),]
 # Test correlation between each covariate and the 'OCSKGMlog'
 names(dat)
 test_covs <- cor(x = as.matrix(dat[,9]),
-                     y = as.matrix(dat[,c(10:33)]))
+                     y = as.matrix(dat[,c(10:42)]))
 test_covs 
 
 # Select only the covariates that have correlation higher than 0.3
@@ -58,7 +58,7 @@ library(reshape)
 
 x <- subset(melt(test_covs), value != 1 | value != NA)
 x <- x[with(x, order(-abs(x$value))),]
-(x <- subset(x,abs(x$value)>0.20))
+(x <- subset(x,abs(x$value)>0.25))
 selection <- as.character(x$X2)
 
 # Leave only selected covariates in the 'covs' raster stack
