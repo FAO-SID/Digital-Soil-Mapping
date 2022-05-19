@@ -191,7 +191,9 @@ writeRaster(Prr_wet, '01-Data/covs/Prr_dry.tif', overwrite=T)
 # Gaussian curvature	 | meter |	Product of maximal and minimal curvatures
 # Shape Index	| dimensionless |	Continuous form of the Gaussian landform classification
 
-
+# install TAGEE
+system("pip install tagee")
+# Import
 TAGEE <- import("tagee")
 
 image <- ee$Image("MERIT/DEM/v1_0_3") %>%
@@ -211,7 +213,7 @@ tagee_test <- ee_as_raster(
   region = region,
   via = "drive"
 )
-
+plot(tagee_test)
 writeRaster(tagee_test, '01-Data/covs/Terrain_attributes.tif', overwrite=T)
 
 # EVI & NDVI ----
