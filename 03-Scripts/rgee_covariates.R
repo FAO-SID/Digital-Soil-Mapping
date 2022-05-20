@@ -45,9 +45,9 @@ setwd(wd)
 
 # Country shapefile
 AOI <- read_sf(AOI)
-
-
-
+# convert AOI to a box polygon
+AOI <- st_as_sfc(st_bbox(AOI))
+AOI <- st_as_sf(AOI)
 
 #List of covariates to prepare
 # Mean annual temperature
