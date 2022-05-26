@@ -17,8 +17,8 @@ gc()
 #  User defined variables:
 
 # Working directory
- wd <- 'C:/Users/luottoi/Documents/GitHub/Digital-Soil-Mapping'
-#wd <- 'C:/Users/hp/Documents/GitHub/Digital-Soil-Mapping'
+# wd <- 'C:/Users/luottoi/Documents/GitHub/Digital-Soil-Mapping'
+wd <- 'C:/Users/hp/Documents/GitHub/Digital-Soil-Mapping'
 
 # Area of interest
 AOI <- '01-Data/MKD.shp'
@@ -47,8 +47,8 @@ setwd(wd)
 # Country shapefile
 AOI <- read_sf(AOI)
 # convert AOI to a box polygon
-AOI <- st_as_sfc(st_bbox(AOI))
-AOI <- st_as_sf(AOI)
+#AOI <- st_as_sfc(st_bbox(AOI))
+#AOI <- st_as_sf(AOI)
 
 #List of covariates to prepare
 # Mean annual temperature
@@ -399,7 +399,11 @@ top_pos = image$resample('bilinear')$reproject(
 # Stack bands ----
 
 SG <-
-  avT$addBands(Pr)$addBands(Prr_all)$addBands(DEMAttributes)$addBands(EVI)$addBands(NDVI)$addBands(land_red)$addBands(sd_d_T)$addBands(land_nir)$addBands(fapar)$addBands(soil_wt)
+  avT$addBands(Pr)$addBands(Prr_all)$addBands(DEMAttributes)$addBands(EVI)
+
+SG <-SG$addBands(NDVI)$addBands(land_red)$addBands(sd_d_T)$addBands(land_nir)
+
+SG <-SG$addBands(fapar)$addBands(soil_wt)$addBands(top_pos)
 
 class(SG)
 metadata <- SG$propertyNames()
@@ -410,7 +414,8 @@ print(inputBandNames)
 dimOne <- length(inputBandNames)
 cat("Number of input bands:", dimOne)
 
-scale <- SG$select("Slope")$projection()$nominalScale()
+# Calculate scale standardize each band to mean=0, s.d.=1. ----
+scale <- SG$select("mean")$projection()$nominalScale()
 cat("Nominal scale: ", scale$getInfo())
 
 SGmean <- SG$reduceRegion(ee$Reducer$mean(),
@@ -427,7 +432,7 @@ saveRDS(as.vector(SGsd$getInfo()), file = "./inputBandSDs.rds")
 SGmean.img <- ee$Image$constant(SGmean$values(inputBandNames))
 SGsd.img <- ee$Image$constant(SGsd$values(inputBandNames))
 
-
+#Standardize
 SGstd <- SG$subtract(SGmean.img)
 SGstd <- SGstd$divide(SGsd.img)
 
@@ -507,7 +512,7 @@ print(data.frame(band=inputBandNames,
                  rotation3 = eigenVectors$getInfo()[[3]]
 ))
 
-#export the eigenvectors
+#export the eigenvectors ----
 eVm <- matrix(unlist(eigenVectors$getInfo()), byrow = TRUE, nrow = dimOne)
 saveRDS(eVm, file = "./eigenvectorMatrix.rds")
 
@@ -528,10 +533,14 @@ PCs <- PCsMatrix$arrayProject(list(0L))$arrayFlatten(
 PCs95 <- PCs$select(0L:(npc95-1L)) # indexing starts from 0
 PCs95$bandNames()$getInfo()
 
-test <- ee_as_raster(
+# Export PCs as raster stack ----
+PCAs_covs <- ee_as_raster(
   image = PCs95,
   scale= res,
   region = region,
   via = "drive"
 )
 
+
+
+writeRaster(PCAs_covs, '02-Outputs/PCA_covariates.tif', overwrite= T)
