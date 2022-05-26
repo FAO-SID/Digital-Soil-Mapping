@@ -18,10 +18,9 @@ gc()
 #  User defined variables:
 
 # Working directory
-# wd <- 'C:/Users/luottoi/Documents/GitHub/Digital-Soil-Mapping'
-wd <- 'C:/Users/hp/Documents/GitHub/Digital-Soil-Mapping'
+ wd <- 'C:/Users/luottoi/Documents/GitHub/Digital-Soil-Mapping'
+#wd <- 'C:/Users/hp/Documents/GitHub/Digital-Soil-Mapping'
 
-soilatt <- c('clay', 'soc')
 #
 #
 #######################################################
@@ -63,22 +62,29 @@ dat <- merge(x=dat_sites, y=dat_layers, by="ProfID")
 summary(dat)
 names (dat)
 
-# Simplify the table by choosing only the parameters that are needed to model SOC stocks: 
-# profile id, coordinates, depth of each layer, SOC, bulk density and coarse fragments.
+# Simplify the table by choosing only the parameters that are needed to model the selected soil attributes: 
 # Note that SOC is OM/1.724 (OM - organic matter)
-dat <- data.frame(id=dat$ProfID,
+
+
+
+data <- data.frame(id=dat$ProfID,
                   X=dat$X,
                   Y=dat$Y,
                   soil=dat$soiltype,
                   top=dat$DepthFrom,
                   bottom=dat$DepthTo,
                   SOC=dat$OM_perc/1.724,
+                  clay = dat$Clay_perc,
+                  pH = dat$pH_H2O,
                   BLD=dat$Bulk_density_gcm3,
                   CRF=dat$Stones_perc)
 
+
+
+# Soil Organic Carbon ----
 # Explore and clean the SOC data
-summary(dat$SOC)
-dat <- dat[!is.na(dat[,"SOC"]),] # remove NA values
+summary(data$SOC)
+dat <- data[complete.cases(data$SOC),] # remove NA values
 dat <- dat[dat$SOC>0,] # remove 0 values
 
 # Explore SOC data, identify outliers
@@ -316,7 +322,7 @@ dat <- dat[complete.cases(dat$OCS),]
 # Check if log-transformation improves the data distribution
 hist(log(dat$OCS), breaks = 50)
 # Add a new column for log-transformes carbon stocks
-dat$OCSlog <- log(dat$OCS)
+dat$clay <- log(dat$OCS)
 
 
 # Save the final table in a .csv file
@@ -327,7 +333,7 @@ write.csv(dat, "02-Outputs/dataproc.csv", row.names = FALSE)
 library(caret)
 
 # Define the random numbers table (to get reproducible result)
-set.seed(11042019)
+set.seed(26522)
 
 # Create random selection of 75% of the data as 'train' dataset and 25% as 'test' dataset
 train.ind <- createDataPartition(1:nrow(dat), p = .75, list = FALSE)
@@ -338,14 +344,162 @@ test  <- dat[-train.ind,]
 summary(train$OCS)
 summary(test$OCS)
 
-plot(density (train$OCSlog), col='red',
+plot(density (train$clay), col='red',
      main='Statistical distribution of train and test datasets')
-lines(density(test$OCSlog), col='blue')
+lines(density(test$clay), col='blue')
 legend('topright', legend=c("train", "test"),
        col=c("red", "blue"), lty=1, cex=1.5)
 
 # Save the 'train' and 'test' datasets as .csv tables
 
-write.csv(train, file="02-Outputs/dat_train.csv", row.names = FALSE)
-write.csv(test, file="02-Outputs/dat_test.csv", row.names = FALSE)
+write.csv(train, file="02-Outputs/SOC_dat_train.csv", row.names = FALSE)
+write.csv(test, file="02-Outputs/SOC_dat_test.csv", row.names = FALSE)
 
+# Clay ----
+
+# Explore and clean the clay data
+summary(data$clay)
+dat <- data[complete.cases(data$clay),] # remove NA values
+dat <- dat[dat$clay>0,] # remove 0 values
+
+# Explore clay data, identify outliers
+summary(dat$clay)
+hist(dat$clay, breaks=100)
+boxplot(dat$clay, horizontal=TRUE)
+
+# Remove outliers automatically, using boxplot
+out <- boxplot(dat$clay, horizontal=TRUE)$out
+dat <- dat[!(dat$clay %in% out),]
+
+
+################################ Calculating clay stocks for standard topsoil depth 0-30cm #######################
+
+dat <-
+  dat[, c("id","top","bottom","clay","BLD","CRF","X",  "Y", "soil")]
+
+#equal area spline clay
+clay <-mpspline(dat, 'clay', d = c(0,30))
+temp <- data.frame()
+for (i in names(clay)){
+  
+  t2 <- cbind(clay[[i]]$id,clay[[i]]$est_dcm[1])
+  
+  
+  temp <- rbind(temp,t2)
+  
+}
+clay <- temp
+
+
+##Since we are predicting clay we don't need Profiles without clay data
+# keed only unique ids
+dat <-dat[,c("id","X",  "Y", "soil") ]
+dat <-dat[!duplicated(dat$id),]
+#Rename columns of mpspline output
+colnames(clay) <- c('id', 'clay')
+
+#Merge the harmonized clay output with the data
+dat <- merge(clay, dat[,c("id","X",  "Y", "soil") ], by='id', all.x=T)
+# We are mapping clay therefore we exclude rows with NA for the clay column
+dat <- dat[complete.cases(dat$clay),]
+dat <- dat[dat$clay>0,]
+
+#Finally merge the other attributes and set to numeric
+dat$clay <- as.numeric(dat$clay)
+
+
+############ Splitting the dataset in calibraition (training the model) and validation (testing the model) ##############
+
+# Create random selection of 75% of the data as 'train' dataset and 25% as 'test' dataset
+train.ind <- createDataPartition(1:nrow(dat), p = .75, list = FALSE)
+train <- dat[ train.ind,]
+test  <- dat[-train.ind,]
+
+# Check if both 'train' and 'test datasets' have similar distributions
+summary(train$clay)
+summary(test$clay)
+
+plot(density (train$clay), col='red',
+     main='Statistical distribution of train and test datasets')
+lines(density(test$clay), col='blue')
+legend('topright', legend=c("train", "test"),
+       col=c("red", "blue"), lty=1, cex=1.5)
+
+# Save the 'train' and 'test' datasets as .csv tables
+
+write.csv(train, file="02-Outputs/clay_dat_train.csv", row.names = FALSE)
+write.csv(test, file="02-Outputs/clay_dat_test.csv", row.names = FALSE)
+
+# pH ----
+
+# Explore and clean the clay data
+summary(data$pH)
+dat <- data[complete.cases(data$pH),] # remove NA values
+
+# Explore pH data, identify outliers
+summary(dat$pH)
+hist(dat$pH, breaks=100)
+boxplot(dat$pH, horizontal=TRUE)
+
+# Remove outliers automatically, using boxplot
+out <- boxplot(dat$pH, horizontal=TRUE)$out
+dat <- dat[!(dat$pH %in% out),]
+
+
+################################ Calculating pH stocks for standard topsoil depth 0-30cm #######################
+
+dat <-
+  dat[, c("id","top","bottom","pH","BLD","CRF","X",  "Y", "soil")]
+
+#equal area spline pH
+pH <-mpspline(dat, 'pH', d = c(0,30))
+temp <- data.frame()
+for (i in names(pH)){
+  
+  t2 <- cbind(pH[[i]]$id,pH[[i]]$est_dcm[1])
+  
+  
+  temp <- rbind(temp,t2)
+  
+}
+pH <- temp
+
+
+##Since we are predicting pH we don't need Profiles without pH data
+# keed only unique ids
+dat <-dat[,c("id","X",  "Y", "soil") ]
+dat <-dat[!duplicated(dat$id),]
+#Rename columns of mpspline output
+colnames(pH) <- c('id', 'pH')
+
+#Merge the harmonized pH output with the data
+dat <- merge(pH, dat[,c("id","X",  "Y", "soil") ], by='id', all.x=T)
+# We are mapping pH therefore we exclude rows with NA for the pH column
+dat <- dat[complete.cases(dat$pH),]
+dat <- dat[dat$pH>0,]
+
+#Finally merge the other attributes and set to numeric
+dat$pH <- as.numeric(dat$pH)
+
+
+############ Splitting the dataset in calibraition (training the model) and validation (testing the model) ##############
+
+# Create random selection of 75% of the data as 'train' dataset and 25% as 'test' dataset
+train.ind <- createDataPartition(1:nrow(dat), p = .75, list = FALSE)
+train <- dat[ train.ind,]
+test  <- dat[-train.ind,]
+
+# Check if both 'train' and 'test datasets' have similar distributions
+summary(train$pH)
+summary(test$pH)
+
+plot(density (train$pH), col='red',
+     main='Statistical distribution of train and test datasets')
+lines(density(test$pH), col='blue')
+legend('topright', legend=c("train", "test"),
+       col=c("red", "blue"), lty=1, cex=1.5)
+
+# Save the 'train' and 'test' datasets as .csv tables
+
+write.csv(train, file="02-Outputs/pH_dat_train.csv", row.names = FALSE)
+write.csv(test, file="02-Outputs/pH_dat_test.csv", row.names = FALSE)
