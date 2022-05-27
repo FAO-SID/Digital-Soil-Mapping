@@ -8,13 +8,13 @@
 #
 #######################################################
 
-#Empty environment and cache ----
+#Empty environment and cache 
 rm(list = ls());
 gc()
 
 #######################################################
 #
-#  User defined variables:
+#  User defined variables: ----
 
 # Working directory
 wd <- 'C:/Users/luottoi/Documents/GitHub/Digital-Soil-Mapping'
@@ -29,7 +29,7 @@ setwd(wd)
 # load packages
 
 library(sf)
-library(terra)
+library(raster)
 library(data.table)
 library(reshape)
 
@@ -41,7 +41,7 @@ library(reshape)
 files <- list.files(path = "01-Data/covs", pattern = "tif*$", full.names = TRUE)
 
 
-covs <- stack(files)
+covs <- raster::stack(files)
 
 
 # Explore the data
@@ -88,33 +88,15 @@ names(covs)
 
 
 save(covs, file = paste0("02-Outputs/", i,"_covariates.RData"))
+print(i)
 }
 
 
-############################################### Add categorical covariates #########################################
+#Add categorical layers
 
 # Import land cover layer
-landcover <- raster ('01-Data/land cover/LandCover.tif')
-plot(landcover)
-
-# Try to stack LandCover raster with the rest
-covs <- stack(covs, landcover)
-
-# Error indicates different extent. Check coordinate system (crs) of covs and LandCover
-(covs@crs) 
-(landcover@crs)  
-
-# 'covs' has crs WGS 84, while landcover has crs UTM Zone 34
-# We need to reproject the 'Lancover' raster using one of the 'covs' as a template 
-landcover <- projectRaster(from = landcover, to = covs$Terrain_attributes.1, method = "ngb")
-
-# Save the reprojected raster
-writeRaster(landcover, '02-Outputs/Landcover_WGS84.tif', overwrite=TRUE)
-
-# Now we can stack it with the other rasters
-
-
-covs <- stack(covs, landcover)
+landcover <- raster('01-Data/land cover/LandCover.tif')
+landcover <- projectRaster(landcover, covs$EVI,)
 
 # Import and explore the soil map (vector polygon data)
 soilmap<-shapefile("01-Data/Soil map/SoilTypes.shp")
@@ -127,27 +109,33 @@ soilmap@data$Symbol <- as.factor(soilmap@data$Symbol)
 # Rasterize the soil map using one of the 'covs' as a template and 'Symbol' as value field
 soilmap.r <- rasterize(x = soilmap, fun='first', y = covs$Terrain_attributes.1, field = "Symbol")
 
-# Explore the result
-plot(soilmap.r, col=rainbow(20))
-legend("bottomright",legend = levels(soilmap$Symbol), fill=rainbow(20),
-       cex=0.5)
-
 # Save the rasterized map
 writeRaster(soilmap.r, '02-Outputs/Soil_map.tif', overwrite=TRUE)
 
-# Now we can stack it with the other rasters
-covs <- stack(covs, soilmap.r)
-names(covs)
-# correct the name 
-names(covs)[names(covs)=='layer'] <- "soilmap"
 
-########################################### Prepare the final stack of covariates for modelling #######################
+for (i in unique(soilatt)){
+  
+ load(file = paste0("02-Outputs/", i,"_covariates.RData"))
 
-# Mask the covariates with the country mask
-plot(covs$Prr)
-mask <- shapefile('01-Data/MKD.shp')
-covs <- mask(x = covs, mask = mask)
-plot(covs$Prr)
+  # stack it with the other rasters
+  covs <- stack(covs, landcover)
+  
+  # Now we can stack it with the other rasters
+  covs <- stack(covs, soilmap.r)
+  names(covs)
+  # correct the name 
+  names(covs)[names(covs)=='layer'] <- "soilmap"
+  
+  # Mask the covariates with the country mask
+  mask <- shapefile('01-Data/MKD.shp')
+  covs <- mask(x = covs, mask = mask)
+  
+  save(covs, file = paste0("02-Outputs/", i,"_covariates.RData"))
 
-# export all the covariates in the R-object
-save(covs, file = "02-Outputs/covariates.RData")
+} 
+
+
+# Dimension reduction based on PCA ----
+
+
+

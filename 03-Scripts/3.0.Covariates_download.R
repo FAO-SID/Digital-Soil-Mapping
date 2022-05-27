@@ -3,6 +3,8 @@
 #  Process and download covariates
 #  from GEE and Zenodo to R 
 #
+#  Export both raw covariates and PCAs
+#
 # GSP-Secretariat
 # Contact: Isabel.Luotto@fao.org
 #
