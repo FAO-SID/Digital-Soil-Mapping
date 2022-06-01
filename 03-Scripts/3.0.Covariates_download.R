@@ -89,6 +89,7 @@ AOI <- read_sf(AOI)
 # Mean annual temperature (daytime) ----
 ee_Initialize()
 
+
 region <- sf_as_ee(AOI)
 region = region$geometry()
 
@@ -162,28 +163,28 @@ image <- ee$ImageCollection("IDAHO_EPSCOR/TERRACLIMATE") %>%
   ee$ImageCollection$filterBounds(region)%>%
   ee$ImageCollection$toBands()
 
-image = image$resample('bilinear')$reproject(
+Prr_all = image$resample('bilinear')$reproject(
   crs= crs,
   scale= res)
 
 
-Prr_all <- ee_as_raster(
-  image = image,
+Prr_allr <- ee_as_raster(
+  image = Prr_all,
   scale= res,
   region = region,
   via = "drive"
 )
 
-sums <- cellStats(Prr_all, 'sum')
+sums <- cellStats(Prr_allr, 'sum')
 wettest <- names(sums[sums ==max(sums)])
-Prr_wet <- Prr_all[[wettest]]
+Prr_wet <- Prr_allr[[wettest]]
 
 writeRaster(Prr_wet, '01-Data/covs/Prr_wet.tif', overwrite=T)
 
 # Precipitation of driest month ----
 
 dryest <- names(sums[sums ==min(sums)])
-Prr_dry <- Prr_all[[dryest]]
+Prr_dry <- Prr_allr[[dryest]]
 
 writeRaster(Prr_wet, '01-Data/covs/Prr_dry.tif', overwrite=T)
 
@@ -205,7 +206,7 @@ writeRaster(Prr_wet, '01-Data/covs/Prr_dry.tif', overwrite=T)
 # Shape Index	| dimensionless |	Continuous form of the Gaussian landform classification
 
 # install TAGEE
-system("pip install tagee")
+#system("pip install tagee")
 # Import
 TAGEE <- import("tagee")
 
@@ -220,14 +221,14 @@ image = image$resample('bilinear')$reproject(
 DEMAttributes = TAGEE$terrainAnalysis( image, region)
 
 
-tagee_test <- ee_as_raster(
+tageer <- ee_as_raster(
   image = DEMAttributes,
   scale= res,
   region = region,
   via = "drive"
 )
 plot(tagee_test)
-writeRaster(tagee_test, '01-Data/covs/Terrain_attributes.tif', overwrite=T)
+writeRaster(tageer, '01-Data/covs/Terrain_attributes.tif', overwrite=T)
 
 # EVI & NDVI ----
 EVI <- ee$ImageCollection("MODIS/061/MOD13Q1") %>%
@@ -423,37 +424,37 @@ writeRaster(top_posr, '01-Data/covs/top_posr.tif', overwrite=T)
 # Get links for the OpenLandMap topographic attributes
 # to download from Zenodo
 
- #instantiate Zen4R client
- zenodo <- ZenodoManager$new()
-
- # Get file record
- my_rec <- zenodo$getRecordByDOI("10.5281/zenodo.1447210")
-
- sel.tif = my_rec$files
-
- # Extract list of links
- links <- data.frame()
- for (i in 1:length(sel.tif)){
-
-   x<-as.data.frame(sel.tif[[i]][["links"]][["download"]])
-     links <- rbind(links,x)
-
-
-}
-
-names(links) <-'Links'
-
-# Selection of topographic attributes
-seltop <- c('slope', 'twi', 'vbf','_curvature','downlslope.curvature','dvm2','dvm','mrn','tpi')
-# Download global layers (to be done once) ---
-
-for (i in unique(seltop)){
-link <- links[grep(i, links$Links),]
-link <- link[grep(resOLM, link)]
-
-
-download.file(link, paste0(output_dir, 'olm_',i,'_',resOLM,'.tif'),mode = "wb")
-}
+#  #instantiate Zen4R client
+#  zenodo <- ZenodoManager$new()
+# 
+#  # Get file record
+#  my_rec <- zenodo$getRecordByDOI("10.5281/zenodo.1447210")
+# 
+#  sel.tif = my_rec$files
+# 
+#  # Extract list of links
+#  links <- data.frame()
+#  for (i in 1:length(sel.tif)){
+# 
+#    x<-as.data.frame(sel.tif[[i]][["links"]][["download"]])
+#      links <- rbind(links,x)
+# 
+# 
+# }
+# 
+# names(links) <-'Links'
+# 
+# # Selection of topographic attributes
+# seltop <- c('slope', 'twi', 'vbf','_curvature','downlslope.curvature','dvm2','dvm','mrn','tpi')
+# # Download global layers (to be done once) ---
+# 
+# for (i in unique(seltop)){
+# link <- links[grep(i, links$Links),]
+# link <- link[grep(resOLM, link)]
+# 
+# 
+# download.file(link, paste0(output_dir, 'olm_',i,'_',resOLM,'.tif'),mode = "wb")
+# }
 
 # Clip and store covariates in working directory
 AOI <- vect(AOI)
@@ -471,6 +472,160 @@ rgee <-rast('01-Data/covs/Prr.tif')
 covs <- resample(covs, rgee)
 
 writeRaster(covs, '01-Data/covs/olm_covs.tif', overwrite=T)  
+covs <- stack(covs)
 
 
+###########################################################################
+# Export PCs based on Principle Component Analysis ----
+
+# Stack bands 
+#avT,Pr,Prr_all,DEMAttributes,EVI,NDVI,sd_d_T,land_red,land_nir,soil_wt,fapar,top_pos
+SG <-
+  avT$addBands(Pr)$addBands(Prr_all)$addBands(DEMAttributes)$addBands(EVI)
+
+SG <-SG$addBands(NDVI)$addBands(land_red)$addBands(sd_d_T)$addBands(land_nir)
+
+SG <-SG$addBands(fapar)$addBands(soil_wt)$addBands(top_pos)
+
+
+
+class(SG)
+metadata <- SG$propertyNames()
+cat("Metadata: ", paste(metadata$getInfo(),"\n",collapse = " "))
+inputBandNames <- SG$bandNames()$getInfo()
+print(inputBandNames)
+
+dimOne <- length(inputBandNames)
+cat("Number of input bands:", dimOne)
+
+# Calculate scale standardize each band to mean=0, s.d.=1. ----
+scale <- SG$select("mean")$projection()$nominalScale()
+cat("Nominal scale: ", scale$getInfo())
+
+SGmean <- SG$reduceRegion(ee$Reducer$mean(),
+                          geometry = region, scale = scale, bestEffort = TRUE)
+head(SGmean$getInfo(),3) # an example of the means
+
+SGsd <- SG$reduceRegion(ee$Reducer$stdDev(),
+                        geometry = region, scale = scale, bestEffort = TRUE)
+head(SGsd$getInfo(),3)
+
+saveRDS(as.vector(SGmean$getInfo()), file = "./inputBandMeans.rds")
+saveRDS(as.vector(SGsd$getInfo()), file = "./inputBandSDs.rds")
+
+SGmean.img <- ee$Image$constant(SGmean$values(inputBandNames))
+SGsd.img <- ee$Image$constant(SGsd$values(inputBandNames))
+
+#Standardize
+SGstd <- SG$subtract(SGmean.img)
+SGstd <- SGstd$divide(SGsd.img)
+
+
+SGstd.minMax <- SGstd$reduceRegion(ee$Reducer$minMax(),
+                                   geometry = region, scale = scale,
+                                   maxPixels = 1e9, bestEffort = TRUE)
+minMaxNames <- names(SGstd.minMax$getInfo())
+minMaxVals <- SGstd.minMax$values()$getInfo()
+# per property min/max
+head(data.frame(property_depth_q=minMaxNames, value=minMaxVals), 12)
+
+# overall min/max
+print(c(min(minMaxVals), max(minMaxVals)) )
+
+# convert image to an array of pixels, for matrix calculations
+# dimensions are N x P; i.e., pixels x bands
+arrays <- SGstd$toArray()
+
+
+# Compute the covariance of the bands within the region.
+covar <- arrays$reduceRegion(
+  ee$Reducer$centeredCovariance(),
+  geometry = region, scale = scale,
+  maxPixels = 1e6,
+  bestEffort = TRUE
+)
+
+
+# Get the covariance result and cast to an array.
+# This represents the band-to-band covariance within the region.
+covarArray <- ee$Array(covar$get('array'))
+# note we know the dimensions from the inputs
+# Perform an eigen analysis and slice apart the values and vectors.
+eigens <- covarArray$eigen()
+# the first item of each slice (PC) is the corresponding eigenvalue
+# the remaining items are the eigenvalues (rotations) for that PC
+
+# by removing the first axis (eigenvalues) and converting to a vector
+# array$slice(axis=0, start=0, end=null, step=1)
+# here we only have one axis, indexed by the PC
+eigenValues <- eigens$slice(1L, 0L, 1L)
+cat('Eigenvalues:')
+## Eigenvalues:
+print(eigenValues.vect <- unlist(eigenValues$getInfo()))
+
+# compute and show proportional eigenvalues
+eigenValuesProportion <-
+  round(100*(eigenValues.vect/sum(eigenValues.vect)),2)
+cat('PCs percent of variance explained:')
+## PCs percent of variance explained:
+print(eigenValuesProportion)
+
+plot(eigenValuesProportion, type="h", xlab="PC",
+     ylab="% of variance explained",
+     main="Standardized PCA")
+
+evsum <- cumsum(eigenValuesProportion)
+cat('PCs percent of variance explained, cumulative sum:')
+## PCs percent of variance explained, cumulative sum:
+print(round(evsum,1))
+
+cat(npc95 <- which(evsum > 95)[1],
+    "PCs are needed to explain 95% of the variance")
+
+saveRDS(eigenValues.vect, file = "./eigenValuesVector.rds")
+
+
+# The eigenvectors (rotations); this is a PxP matrix with eigenvectors in rows.
+eigenVectors <- eigens$slice(1L, 1L)
+# show the first few rotations
+cat('Eigenvectors 1--3:')
+## Eigenvectors 1--3:
+print(data.frame(band=inputBandNames,
+                 rotation1 = eigenVectors$getInfo()[[1]],
+                 rotation2 = eigenVectors$getInfo()[[2]],
+                 rotation3 = eigenVectors$getInfo()[[3]]
+))
+
+#export the eigenvectors ----
+eVm <- matrix(unlist(eigenVectors$getInfo()), byrow = TRUE, nrow = dimOne)
+saveRDS(eVm, file = "./eigenvectorMatrix.rds")
+
+arrayImage <- arrays$toArray(1L)
+PCsMatrix <- ee$Image(eigenVectors)$matrixMultiply(arrayImage)
+
+# arrayProject: "Projects the array in each pixel to a lower dimensional #
+#space by specifying the axes to retain"
+# arrayFlatten: "Converts a single band image of equal-shape
+# multidimensional pixels
+# to an image of scalar pixels,
+# with one band for each element of the array."
+PCbandNames <- as.list(paste0('PC', seq(1L:dimOne)))
+PCs <- PCsMatrix$arrayProject(list(0L))$arrayFlatten(
+  list(PCbandNames)
+)
+
+PCs95 <- PCs$select(0L:(npc95-1L)) # indexing starts from 0
+PCs95$bandNames()$getInfo()
+
+# Export PCs as raster stack ----
+PCAs_covs <- ee_as_raster(
+  image = PCs95,
+  scale= res,
+  region = region,
+  via = "drive"
+)
+
+
+
+writeRaster(PCAs_covs, '02-Outputs/PCA_covariates.tif', overwrite= T)
 
