@@ -23,8 +23,8 @@ gc()
 wd <- 'C:/Users/hp/Documents/GitHub/Digital-Soil-Mapping'
 
 # Folder to store global layers from Zenodo
-output_dir <-'C:/Users/hp/Documents/FAO/data/OpenLandMap/'
-#output_dir <-'C:/Users/luottoi/Documents/data/OpenLandMap/'
+#output_dir <-'C:/Users/hp/Documents/FAO/data/OpenLandMap/'
+output_dir <-'C:/Users/luottoi/Documents/data/OpenLandMap/'
 
 # Area of interest
 AOI <- '01-Data/MKD.shp'
@@ -228,6 +228,8 @@ tageer <- ee_as_raster(
   region = region,
   via = "drive"
 )
+
+
 plot(tageer)
 
 

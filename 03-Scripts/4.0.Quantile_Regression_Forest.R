@@ -21,6 +21,8 @@ wd <- 'C:/Users/luottoi/Documents/GitHub/Digital-Soil-Mapping'
 #wd <- 'C:/Users/hp/Documents/GitHub/Digital-Soil-Mapping'
 #List of soil attributes prepared in script #2
 soilatt <- c('OCS','clay', 'pH')
+
+AOI <- '01-Data/MKD.shp'
 #
 #
 #######################################################
@@ -32,212 +34,184 @@ setwd(wd)
 #install.packages(c("quantregForest", "snow", "Metrics"))
 
 ############################### Prapare the final table for modelling (regression matrix) 
-library(raster)
-library(sp)
+library(tidyverse)
+library(data.table)
 library(caret)
-library(Metrics)
 library(quantregForest)
-library(snow)
-library(foreach)    
+library(terra)
+library(sf)
 library(doParallel)
 
+# Load PC covariates (the same for all soil attributes)
+covs_pc <- rast('02-Outputs/PCA_covariates.tif')
 
-# Generate RF maps and uncertainty
+# Calibrate QRF models, perform QA and select the best model ----
 for(i in unique(soilatt)){
 
-#Map Soil attributes with covariates selected based on correlation ----
-load(file = paste0("02-Outputs/", i,"_covariates.RData"))
-names(covs)
-
+#Load data and covariates stacks based on correlation
+covs <-rast( paste0("02-Outputs/", i,"_covariates.tif"))
+  
+covs <-  c(covs, covs_pc)  
 # Load the processed data for digital soil mapping. This table was prepared in the 'data_preparation_profiles' script
 dat <- read.csv(paste0("02-Outputs/",i,"_dat_train.csv"))
 names(dat)
 
 # extract values from covariates to the soil points
-coordinates(dat) <- ~ X + Y
-dat <- extract(x = covs, y = dat, sp = TRUE)
+projcrs <- "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
+dat <- st_as_sf(dat,                         
+                coords = c("X", "Y"),
+                crs = projcrs)
+
+
+# Extract values from covariates to the soil points
+pv <- extract(x = covs, y = vect(dat),xy=F)
+dat <- cbind(dat,pv)
+
 summary(dat)
 
 # Remove NA values
-dat<-as.data.frame(dat)
+dat <-as.data.frame(dat)
+dat[, 'geometry'] <-NULL
+
 dat <- dat[complete.cases(dat),]
 
-str(dat)
+# Defined formulas and QRF parameters
+fitControl <- trainControl(method = "repeatedcv",
+                           number = 10,         ## 10 -fold CV
+                           repeats = 3,        ## repeated 3 times
+                           verboseIter = TRUE,
+                           returnData = TRUE)
 
-# LandCover and soilmap are categorical variables, they need to be 'factor' type
-#dat$LandCover <- as.factor(dat$LandCover)
-#dat$soilmap <- as.factor(dat$soilmap)
-str(dat)
-
-#coordinates(dat) <- ~ X + Y
-
-# Generate an empty dataframe
-#validation <- data.frame(rmse=numeric(), r2=numeric())
-
-fm = as.formula(paste(i," ~", paste0(names(covs),
-                                      collapse = "+")))
-fm
-
-
-ctrl <- trainControl(method = "cv", savePred=T)
-
-
-# Sensitivity to the dataset
-# Cross-validation 10-k run in parallel
-cores <- detectCores() -2
-
-registerDoParallel(makeCluster(cores)) # Use 4 cores for parallel CV
-
-# Assuming this is your dataset 
-
-cv <- caret::createFolds(1:nrow(dat), k=10, list=T) # Create 10 folds
-
-pred <- stack()
-# 'dopar' here would run this on multiple threads (change to just 'do' for synchronous runs)
-results <- foreach(i= 1:length(cv), .packages = c("raster", "sp", "caret"),.export = ls(globalenv())) %dopar% {
-  
-  # Get the fold data where 'fold' is nothing more than a list of indexes for test observations in the data
-  train <- dat[cv[[i]],] # Get the opposite of the test observations to train on
-  
-  
-  # Fit the model and make predictions
-  modn <- train(fm, data=train, method = "rf",
-                trControl = ctrl)
-  pred_cv <-predict(covs, modn)
-  stack(pred, pred_cv)
-  
-}
-stopImplicitCluster()
-
-
-sensitivity <- calc(stack(results), sd)
-
-# The sensitivity map is the dispersion of all individual models
-plot(sensitivity, col=rev(topo.colors(10)),
-     main='Sensitivity based on 10 realizations using 25% samples')
-
-
-
-#generate mtry variable using caret package 
-rfmodel<- train(fm, data=dat, method = "rf", trControl = ctrl,
-                importance=TRUE)
-
-
-# run the quantile regression forest algorithm
-model <- quantregForest(y=dat[[i]], x=dat[,names(covs)],
-                        ntree=500, keep.inbag=TRUE,
-                        mtry = as.numeric(rfmodel$bestTune))
-
-
-# Define number of cores to use
-beginCluster(cores)
-
-# Estimate model uncertainty
-unc <- clusterR(covs, predict, args=list(model=model,what=sd))
-
-# OCS prediction based in all available data
-mean <- clusterR(covs, predict, args=list(model=model,what=mean))
-# The total uncertainty is the sum of sensitivity and model
-# uncertainty
-unc <- unc + sensitivity
-# Express the uncertainty in percent % (divide by the mean)
-Total_unc_Percent <- unc/mean
-endCluster()
-
-# Plot both maps (the predicted OCS and associated uncertainty)
-plot(mean, main='based in all data')
-plot(Total_unc_Percent, main='Total uncertainty %')
-
-writeRaster(mean, paste0('02-Outputs/Final Maps/',i,'_RF.tif'), overwrite=TRUE)
-writeRaster(unc, paste0('02-Outputs/Final Maps/',i,'_RF_sd.tif'), overwrite=TRUE)
-
-
-# Run analysis with PCs ----
-#Load PCs
-covs_pc <- stack('02-Outputs/PCA_covariates.tif')
-# Load the processed data for digital soil mapping. This table was prepared in the 'data_preparation_profiles' script
-dat <- read.csv(paste0("02-Outputs/",i,"_dat_train.csv"))
-
-# extract values from covariates to the soil points
-coordinates(dat) <- ~ X + Y
-dat <- extract(x = covs_pc, y = dat, sp = TRUE)
-
-
-# Remove NA values
-dat<-as.data.frame(dat)
-dat <- dat[complete.cases(dat),]
-
-
-fm = as.formula(paste(i," ~", paste0(names(covs_pc),
+fm = as.formula(paste(i," ~", paste0(names(covs)[!names(covs)%in% names(covs_pc)],
                                      collapse = "+")))
-fm
+
+fm_pc = as.formula(paste(i," ~", paste0(names(covs_pc),
+                                        collapse = "+")))
+tuneGrid <-  expand.grid(mtry = c(100, 200, 500))
+#Calibrate the model using multiple cores
+cl <- makeCluster(detectCores()-2)
+registerDoParallel(cl)
+# set 3 times repeated 10-fold cross-validation
 
 
-# Cross-validation 10-k run in parallel
-cores <- detectCores() -2
+#Correlation covariates
+model <- caret::train(fm,
+                      data = dat[, c(i,names(covs)[!names(covs)%in% names(covs_pc)])],
+                      method = "qrf",
+                      trControl = fitControl,
+                      verbose = TRUE,
+                      tuneGrid = tuneGrid,
+                      keep.inbag = T)
+print(model)
+print(paste("qrf model = ", i))
 
-registerDoParallel(makeCluster(cores)) # Use 4 cores for parallel CV
+#Extract predictor importances as relative values (%)
+model$importance <-
+  data.frame(var=rownames(importance(model$finalModel)),
+             importance(model$finalModel)/sum(importance(model$finalModel))*100) %>%
+  arrange(desc(IncNodePurity))
 
-# Assuming this is your dataset 
+# print(model)
+saveRDS(model, file = paste0("02-Outputs/model_", soilatt[i], ".rds"))
 
-cv <- caret::createFolds(1:nrow(dat), k=10, list=T) # Create 10 folds
+#PC covariates
+model_pc <- caret::train(fm_pc,
+                      data = dat[, c(i, names(covs_pc))],
+                      method = "qrf",
+                      trControl = fitControl,
+                      verbose = TRUE,
+                      tuneGrid = tuneGrid,
+                      keep.inbag = T)
+print(model_pc)
+print(paste("qrf model = ", soilatt[i]))
 
-pred <- stack()
-# 'dopar' here would run this on multiple threads (change to just 'do' for synchronous runs)
-results <- foreach(i= 1:length(cv), .packages = c("raster", "sp", "caret"),.export = ls(globalenv())) %dopar% {
-  
-  # Get the fold data where 'fold' is nothing more than a list of indexes for test observations in the data
-  train <- dat[cv[[i]],] # Get the opposite of the test observations to train on
-  
-  
-  # Fit the model and make predictions
-  modn <- train(fm, data=train, method = "rf",
-                trControl = ctrl)
-  pred_cv <-predict(covs_pc, modn)
-  stack(pred, pred_cv)
-  
+#Extract predictor importances as relative values (%)
+model_pc$importance <-
+  data.frame(var=rownames(importance(model_pc$finalModel)),
+             importance(model_pc$finalModel)/sum(importance(model_pc$finalModel))*100) %>%
+  arrange(desc(IncNodePurity))
+
+# print(model)
+saveRDS(model_pc, file = paste0("02-Outputs/model_PC_", i, ".rds"))
+
+stopCluster(cl)
+gc()
+
+
+#Quality Assuarance (RMSE,Rsquared,MAE)
+model_pc <-readRDS(file = paste0("02-Outputs/model_PC_", i, ".rds"))
+model <-readRDS(file = paste0("02-Outputs/model_", i, ".rds"))
+
+#Select final model (PC vs correlation) based on RMSE,Rsquared,MAE
+mod_sel <- data.frame(model=0,model_pc=0)
+
+if(max(model$results$Rsquared)>max(model_pc$results$Rsquared)){
+  mod_sel$model <- 1
+  mod_sel$model_pc <- 0
+}else{
+  mod_sel$model <- 0
+  mod_sel$model_pc <- 1 }
+  if(max(model$results$RMSE)<max(model_pc$results$RMSE)){
+    mod_sel$model <-mod_sel$model +1
+ }else{
+    mod_sel$model_pc <-mod_sel$model_pc +1
 }
-stopImplicitCluster()
-
-sensitivity <- calc(stack(results), sd)
-plot(sensitivity, col=rev(topo.colors(10)),
-     main='Sensitivity based on 10 realizations using 25% samples')
-
-
-
-#generate mtry variable using caret package 
-rfmodel<- train(fm, data=dat, method = "rf", trControl = ctrl,
-                importance=TRUE)
-
-
-# run the quantile regression forest algorithm
-model <- quantregForest(y=dat[[i]], x=dat[,names(covs_pc)],
-                        ntree=500, keep.inbag=TRUE,
-                        mtry = as.numeric(rfmodel$bestTune))
-
-
-# Define number of cores to use
-beginCluster(cores)
-## 8 cores detected, using 7
-# Estimate model uncertainty
-unc <- clusterR(covs_pc, predict, args=list(model=model,what=sd))
-
-# OCS prediction based in all available data
-mean <- clusterR(covs_pc, predict, args=list(model=model,what=mean))
-# The total uncertainty is the sum of sensitivity and model
-# uncertainty
-unc <- unc + sensitivity
-# Express the uncertainty in percent % (divide by the mean)
-Total_unc_Percent <- unc/mean*100
-endCluster()
-
-# Plot both maps (the predicted OCS and associated uncertainty)
-plot(mean, main='based in all data')
-plot(Total_unc_Percent, main='Total uncertainty %')
-
-writeRaster(mean, paste0('02-Outputs/Final Maps/',i,'_RF_PCA.tif'), overwrite=TRUE)
-writeRaster(unc, paste0('02-Outputs/Final Maps/',i,'_RF_sd_PCA.tif'), overwrite=TRUE)
-
-
-
+if(max(model$results$MAE)<max(model_pc$results$MAE)){
+    mod_sel$model <-mod_sel$model +1
+ }else{
+    mod_sel$model_pc <-mod_sel$model_pc +1
 }
+
+
+
+if(mod_sel$model > mod_sel$model_pc){
+  mod_sel <- 'Model based on correlated covaraites'
+  final_mod <-'model_'
+}else{
+  mod_sel <- 'Model based on PCs'
+  final_mod <-'model_PC_'
+}
+
+print(paste('Final Model to select:',mod_sel ))
+model$results
+model_pc$results
+}
+
+# Predict and map selected soil attributes with the best model ----
+# Make tiles to run model in parallel
+r <-rast(covs[[1]])
+t <- rast(nrows = 5, ncols = 5, extent = ext(r), crs = crs(r))
+  tile <- makeTiles(r, t,overwrite=TRUE,filename="02-Outputs/tiles/tiles.tif")
+
+  
+
+#Predict soil attributes per tiles
+# loop to predict on each tile
+
+
+for (j in seq_along(tile)) {
+ gc()
+   t <- rast(tile[j])
+ covst <- crop(covs, t)
+
+ names(covst)
+  # plot(r)# 
+  pred_mean <- predict(covst, model = model, na.rm=TRUE,  
+                       cpkgs="randomForest", what="mean",
+                       filename = paste0("02-Outputs/Final Maps/tiles/", i,"_tile_", j, ".tif"),
+                       overwrite = TRUE)
+  pred_sd <- predict(covst, model = model, na.rm=TRUE,  
+                     cpkgs="randomForest", what="sd",
+                     filename = paste0("02-Outputs/Final Maps/tiles/", i,"_tile_SD_", j, ".tif"),
+                     overwrite = TRUE)                
+            
+  rm(pred_mean)
+  rm(pred_sd)
+  gc()
+  print(paste("tile",tile$lyr.1[j]))
+}
+  
+
+  
+  
+

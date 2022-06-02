@@ -29,7 +29,7 @@ setwd(wd)
 # load packages
 
 library(sf)
-library(raster)
+library(terra)
 library(data.table)
 library(reshape)
 
@@ -41,7 +41,7 @@ library(reshape)
 files <- list.files(path = "01-Data/covs", pattern = "tif*$", full.names = TRUE)
 
 
-covs <- raster::stack(files)
+covs <- rast(files)
 
 
 # Explore the data
@@ -62,15 +62,21 @@ dat <- st_as_sf(dat,
                crs = projcrs)
 
 # Extract values from covariates to the soil points
-dat <- extract(x = covs, y = dat, sp = TRUE)
+pv <- extract(x = covs, y = vect(dat),xy=F)
+dat <- cbind(dat,pv)
+
 summary(dat)
 
 # Remove NA values
-dat<-as.data.frame(dat)
+dat <-as.data.frame(dat)
+dat[, 'geometry'] <-NULL
+
 dat <- dat[complete.cases(dat),]
 
 # Test correlation between each covariate and the soil attribute
 names(dat)
+
+
 test_covs <- cor(x = as.matrix(dat[,i]),
                  y = as.matrix(dat[,names(covs)]))
 test_covs 
@@ -87,7 +93,7 @@ covs <- covs[[selection]]
 names(covs)
 
 
-save(covs, file = paste0("02-Outputs/", i,"_covariates.RData"))
+writeRaster(covs, file = paste0("02-Outputs/", i,"_covariates.tif"))
 print(i)
 }
 
