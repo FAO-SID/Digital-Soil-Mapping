@@ -65,7 +65,7 @@ rfmodel <- readRDS(paste0("models/model_", "cec", ".rds")
 # Load shape file with tiles for prediction
 tile <- vect("tiles/tiles_small.shp")
 tile$lyr.1
-# load tif covariates
+# load tiff covariates
 f <- list.files(path = "covs", pattern = ".tif$", full.names = TRUE)
 
 # loop to predict on each tile
