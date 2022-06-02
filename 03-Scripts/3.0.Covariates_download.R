@@ -19,12 +19,12 @@ gc()
 #  User defined variables:
 
 # Working directory
- wd <- 'C:/Users/luottoi/Documents/GitHub/Digital-Soil-Mapping'
-#wd <- 'C:/Users/hp/Documents/GitHub/Digital-Soil-Mapping'
+# wd <- 'C:/Users/luottoi/Documents/GitHub/Digital-Soil-Mapping'
+wd <- 'C:/Users/hp/Documents/GitHub/Digital-Soil-Mapping'
 
 # Folder to store global layers from Zenodo
-#output_dir <-'C:/Users/hp/Documents/FAO/data/OpenLandMap/'
-output_dir <-'C:/Users/luottoi/Documents/data/OpenLandMap/'
+output_dir <-'C:/Users/hp/Documents/FAO/data/OpenLandMap/'
+#output_dir <-'C:/Users/luottoi/Documents/data/OpenLandMap/'
 
 # Area of interest
 AOI <- '01-Data/MKD.shp'
@@ -47,7 +47,6 @@ library(data.table)
 library(terra)
 library(sf)
 library(rgee)
-#install.packages('zen4R')
 library(zen4R)
 library(reticulate)
 
@@ -206,19 +205,21 @@ writeRaster(Prr_wet, '01-Data/covs/Prr_dry.tif', overwrite=T)
 # Shape Index	| dimensionless |	Continuous form of the Gaussian landform classification
 
 # install TAGEE
-#system("pip install tagee")
+system("pip install tagee")
 # Import
 TAGEE <- import("tagee")
 
 image <- ee$Image("MERIT/DEM/v1_0_3") %>%
   ee$Image$clip(region)%>%
   ee$Image$toDouble()
+ 
 
 image = image$resample('bilinear')$reproject(
   crs= crs,
   scale= res)
 
-DEMAttributes = TAGEE$terrainAnalysis( image, region)
+DEMAttributes = TAGEE$terrainAnalysis(image,region)
+DEMAttributes =   DEMAttributes$unmask(0)
 
 
 tageer <- ee_as_raster(
@@ -227,7 +228,10 @@ tageer <- ee_as_raster(
   region = region,
   via = "drive"
 )
-plot(tagee_test)
+plot(tageer)
+
+
+
 writeRaster(tageer, '01-Data/covs/Terrain_attributes.tif', overwrite=T)
 
 # EVI & NDVI ----

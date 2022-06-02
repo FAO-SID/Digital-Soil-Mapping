@@ -17,8 +17,8 @@ gc()
 #  User defined variables: ----
 
 # Working directory
-wd <- 'C:/Users/luottoi/Documents/GitHub/Digital-Soil-Mapping'
-
+#wd <- 'C:/Users/luottoi/Documents/GitHub/Digital-Soil-Mapping'
+wd <- 'C:/Users/hp/Documents/GitHub/Digital-Soil-Mapping'
 #List of soil attributes prepared in script #2
 soilatt <- c('SOC','clay', 'pH')
 #
@@ -94,48 +94,47 @@ print(i)
 
 #Add categorical layers
 
-# Import land cover layer
-landcover <- raster('01-Data/land cover/LandCover.tif')
-landcover <- projectRaster(landcover, covs$EVI,)
+# # Import land cover layer
+# landcover <- raster('01-Data/land cover/LandCover.tif')
+# landcover <- projectRaster(landcover, covs$EVI,)
+# 
+# # Import and explore the soil map (vector polygon data)
+# soilmap<-shapefile("01-Data/Soil map/SoilTypes.shp")
+# plot(soilmap)
+# summary(soilmap)
+# 
+# # We will use 'Symbol' attribute as an indication of soil type. It has to be 'factor' type.
+# soilmap@data$Symbol <- as.factor(soilmap@data$Symbol)
+# 
+# # Rasterize the soil map using one of the 'covs' as a template and 'Symbol' as value field
+# soilmap.r <- rasterize(x = soilmap, fun='first', y = covs$Terrain_attributes.1, field = "Symbol")
+# 
+# # Save the rasterized map
+# writeRaster(soilmap.r, '02-Outputs/Soil_map.tif', overwrite=TRUE)
+# 
+# 
+# for (i in unique(soilatt)){
+#   
+#  load(file = paste0("02-Outputs/", i,"_covariates.RData"))
+# 
+#   # stack it with the other rasters
+#   covs <- stack(covs, landcover)
+#   
+#   # Now we can stack it with the other rasters
+#   covs <- stack(covs, soilmap.r)
+#   names(covs)
+#   # correct the name 
+#   names(covs)[names(covs)=='layer'] <- "soilmap"
+#   
+#   # Mask the covariates with the country mask
+#   mask <- shapefile('01-Data/MKD.shp')
+#   covs <- mask(x = covs, mask = mask)
+#   
+#   save(covs, file = paste0("02-Outputs/", i,"_covariates.RData"))
+# 
+# } 
 
-# Import and explore the soil map (vector polygon data)
-soilmap<-shapefile("01-Data/Soil map/SoilTypes.shp")
-plot(soilmap)
-summary(soilmap)
 
-# We will use 'Symbol' attribute as an indication of soil type. It has to be 'factor' type.
-soilmap@data$Symbol <- as.factor(soilmap@data$Symbol)
-
-# Rasterize the soil map using one of the 'covs' as a template and 'Symbol' as value field
-soilmap.r <- rasterize(x = soilmap, fun='first', y = covs$Terrain_attributes.1, field = "Symbol")
-
-# Save the rasterized map
-writeRaster(soilmap.r, '02-Outputs/Soil_map.tif', overwrite=TRUE)
-
-
-for (i in unique(soilatt)){
-  
- load(file = paste0("02-Outputs/", i,"_covariates.RData"))
-
-  # stack it with the other rasters
-  covs <- stack(covs, landcover)
-  
-  # Now we can stack it with the other rasters
-  covs <- stack(covs, soilmap.r)
-  names(covs)
-  # correct the name 
-  names(covs)[names(covs)=='layer'] <- "soilmap"
-  
-  # Mask the covariates with the country mask
-  mask <- shapefile('01-Data/MKD.shp')
-  covs <- mask(x = covs, mask = mask)
-  
-  save(covs, file = paste0("02-Outputs/", i,"_covariates.RData"))
-
-} 
-
-
-# Dimension reduction based on PCA ----
 
 
 
