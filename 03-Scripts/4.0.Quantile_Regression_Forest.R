@@ -17,10 +17,10 @@ gc()
 #  User defined variables: ----
 
 # Working directory
-#wd <- 'C:/Users/luottoi/Documents/GitHub/Digital-Soil-Mapping'
-wd <- 'C:/Users/hp/Documents/GitHub/Digital-Soil-Mapping'
+wd <- 'C:/Users/luottoi/Documents/GitHub/Digital-Soil-Mapping'
+#wd <- 'C:/Users/hp/Documents/GitHub/Digital-Soil-Mapping'
 #List of soil attributes prepared in script #2
-soilatt <- c('SOC','clay', 'pH')
+soilatt <- c('OCS','clay', 'pH')
 #
 #
 #######################################################
@@ -42,11 +42,10 @@ library(foreach)
 library(doParallel)
 
 
-# Generate RF maps and uncertainty with the selected covariates ----
+# Generate RF maps and uncertainty
 for(i in unique(soilatt)){
 
-# Load the covariates stack. It was was prepared in the 'data_preparation_covariates' script
-
+#Map Soil attributes with covariates selected based on correlation ----
 load(file = paste0("02-Outputs/", i,"_covariates.RData"))
 names(covs)
 
@@ -84,8 +83,10 @@ ctrl <- trainControl(method = "cv", savePred=T)
 
 
 # Sensitivity to the dataset
-# Start a loop with 10 model realizations
-registerDoParallel(makeCluster(4)) # Use 4 cores for parallel CV
+# Cross-validation 10-k run in parallel
+cores <- detectCores() -2
+
+registerDoParallel(makeCluster(cores)) # Use 4 cores for parallel CV
 
 # Assuming this is your dataset 
 
@@ -106,6 +107,9 @@ results <- foreach(i= 1:length(cv), .packages = c("raster", "sp", "caret"),.expo
   stack(pred, pred_cv)
   
 }
+stopImplicitCluster()
+
+
 sensitivity <- calc(stack(results), sd)
 
 # The sensitivity map is the dispersion of all individual models
@@ -126,7 +130,7 @@ model <- quantregForest(y=dat[[i]], x=dat[,names(covs)],
 
 
 # Define number of cores to use
-beginCluster()
+beginCluster(cores)
 
 # Estimate model uncertainty
 unc <- clusterR(covs, predict, args=list(model=model,what=sd))
@@ -137,7 +141,7 @@ mean <- clusterR(covs, predict, args=list(model=model,what=mean))
 # uncertainty
 unc <- unc + sensitivity
 # Express the uncertainty in percent % (divide by the mean)
-Total_unc_Percent <- unc/mean*100
+Total_unc_Percent <- unc/mean
 endCluster()
 
 # Plot both maps (the predicted OCS and associated uncertainty)
@@ -148,26 +152,20 @@ writeRaster(mean, paste0('02-Outputs/Final Maps/',i,'_RF.tif'), overwrite=TRUE)
 writeRaster(unc, paste0('02-Outputs/Final Maps/',i,'_RF_sd.tif'), overwrite=TRUE)
 
 
-# Run analysis with PCs
+# Run analysis with PCs ----
 #Load PCs
 covs_pc <- stack('02-Outputs/PCA_covariates.tif')
 # Load the processed data for digital soil mapping. This table was prepared in the 'data_preparation_profiles' script
 dat <- read.csv(paste0("02-Outputs/",i,"_dat_train.csv"))
-names(dat)
 
 # extract values from covariates to the soil points
 coordinates(dat) <- ~ X + Y
 dat <- extract(x = covs_pc, y = dat, sp = TRUE)
-summary(dat)
+
 
 # Remove NA values
 dat<-as.data.frame(dat)
 dat <- dat[complete.cases(dat),]
-
-str(dat)
-
-
-
 
 
 fm = as.formula(paste(i," ~", paste0(names(covs_pc),
@@ -175,9 +173,10 @@ fm = as.formula(paste(i," ~", paste0(names(covs_pc),
 fm
 
 
-# Sensitivity to the dataset
-# Start a loop with 10 model realizations
-registerDoParallel(makeCluster(4)) # Use 4 cores for parallel CV
+# Cross-validation 10-k run in parallel
+cores <- detectCores() -2
+
+registerDoParallel(makeCluster(cores)) # Use 4 cores for parallel CV
 
 # Assuming this is your dataset 
 
@@ -198,6 +197,8 @@ results <- foreach(i= 1:length(cv), .packages = c("raster", "sp", "caret"),.expo
   stack(pred, pred_cv)
   
 }
+stopImplicitCluster()
+
 sensitivity <- calc(stack(results), sd)
 plot(sensitivity, col=rev(topo.colors(10)),
      main='Sensitivity based on 10 realizations using 25% samples')
@@ -216,7 +217,7 @@ model <- quantregForest(y=dat[[i]], x=dat[,names(covs_pc)],
 
 
 # Define number of cores to use
-beginCluster()
+beginCluster(cores)
 ## 8 cores detected, using 7
 # Estimate model uncertainty
 unc <- clusterR(covs_pc, predict, args=list(model=model,what=sd))
@@ -236,7 +237,6 @@ plot(Total_unc_Percent, main='Total uncertainty %')
 
 writeRaster(mean, paste0('02-Outputs/Final Maps/',i,'_RF_PCA.tif'), overwrite=TRUE)
 writeRaster(unc, paste0('02-Outputs/Final Maps/',i,'_RF_sd_PCA.tif'), overwrite=TRUE)
-
 
 
 

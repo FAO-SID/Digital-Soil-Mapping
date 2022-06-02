@@ -60,7 +60,7 @@ library(caret)
 # library(tuneRanger)
 library(quantregForest)
 setwd("/home/nomade/Documents/gbsmap/Global/")
-rfmodel <- readRDS(paste0("models/model_", "cec", ".rds")
+rfmodel <- readRDS(paste0("models/model_", "cec", ".rds"))
 
 # Load shape file with tiles for prediction
 tile <- vect("tiles/tiles_small.shp")

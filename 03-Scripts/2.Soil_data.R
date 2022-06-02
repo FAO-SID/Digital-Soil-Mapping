@@ -319,14 +319,7 @@ hist(dat$OCS, breaks = 50)
 #Remove Nas 
 dat <- dat[complete.cases(dat$OCS),]
 
-# Check if log-transformation improves the data distribution
-hist(log(dat$OCS), breaks = 50)
-# Add a new column for log-transformes carbon stocks
-dat$clay <- log(dat$OCS)
 
-
-# Save the final table in a .csv file
-write.csv(dat, "02-Outputs/dataproc.csv", row.names = FALSE)
 
 ############ Splitting the dataset in calibraition (training the model) and validation (testing the model) ##############
 
@@ -344,16 +337,16 @@ test  <- dat[-train.ind,]
 summary(train$OCS)
 summary(test$OCS)
 
-plot(density (train$clay), col='red',
+plot(density (train$OCS), col='red',
      main='Statistical distribution of train and test datasets')
-lines(density(test$clay), col='blue')
+lines(density(test$OCS), col='blue')
 legend('topright', legend=c("train", "test"),
        col=c("red", "blue"), lty=1, cex=1.5)
 
 # Save the 'train' and 'test' datasets as .csv tables
 
-write.csv(train, file="02-Outputs/SOC_dat_train.csv", row.names = FALSE)
-write.csv(test, file="02-Outputs/SOC_dat_test.csv", row.names = FALSE)
+write.csv(train, file="02-Outputs/OCS_dat_train.csv", row.names = FALSE)
+write.csv(test, file="02-Outputs/OCS_dat_test.csv", row.names = FALSE)
 
 # Clay ----
 
