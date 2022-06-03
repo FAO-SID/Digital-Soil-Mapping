@@ -142,6 +142,7 @@ gc()
 model_pc <-readRDS(file = paste0("02-Outputs/model_PC_", i, ".rds"))
 model <-readRDS(file = paste0("02-Outputs/model_", i, ".rds"))
 
+
 #Select final model (PC vs correlation) based on RMSE,Rsquared,MAE
 mod_sel <- data.frame(model=0,model_pc=0)
 
@@ -166,11 +167,11 @@ if(max(model$results$MAE)<max(model_pc$results$MAE)){
 
 if(mod_sel$model > mod_sel$model_pc){
   mod_sel <- 'Model based on correlated covaraites'
-  final_mod <-model
+  final_mod <-model$finalModel
   rm(model_pc)
 }else{
   mod_sel <- 'Model based on PCs'
-  final_mod <-model_pc
+  final_mod <-model_pc$finalModel
   rm(model)
 }
 
@@ -181,6 +182,7 @@ final_mod$results
 
 
 }
+
 
   
 r <-covs[[1]]
@@ -201,11 +203,12 @@ for (j in seq_along(tile)) {
 
   # plot(r)# 
   pred_mean <- predict(covst, model = final_mod, na.rm=TRUE,  
-                       cpkgs="randomForest", what="mean",
+                       cpkgs="randomForest", what=mean,
                       # filename = paste0("02-Outputs/Final Maps/tiles/", i,"_tile_", j, ".tif"),
-                       overwrite = TRUE)
+                      # overwrite = TRUE
+                      )
   pred_sd <- predict(covst, model = final_mod, na.rm=TRUE,  
-                     cpkgs="randomForest", type='sd')  
+                     cpkgs="randomForest", what=sd)  
   
   writeRaster(pred_mean, filename = paste0("02-Outputs/Final Maps/tiles/", i,"_tile_", j, ".tif"), 
               overwrite = TRUE)
