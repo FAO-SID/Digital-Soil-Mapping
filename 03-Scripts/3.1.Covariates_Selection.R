@@ -93,7 +93,7 @@ covs <- covs[[selection]]
 names(covs)
 
 
-writeRaster(covs, file = paste0("02-Outputs/", i,"_covariates.tif"))
+writeRaster(covs, file = paste0("02-Outputs/", i,"_covariates.tif"),overwrite=TRUE)
 print(i)
 }
 

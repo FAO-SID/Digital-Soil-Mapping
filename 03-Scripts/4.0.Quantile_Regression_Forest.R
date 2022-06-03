@@ -51,7 +51,7 @@ for(i in unique(soilatt)){
 #Load data and covariates stacks based on correlation
 covs <-rast( paste0("02-Outputs/", i,"_covariates.tif"))
   
-covs <-  c(covs, covs_pc)  
+covs_all <-  c(covs, covs_pc)  
 # Load the processed data for digital soil mapping. This table was prepared in the 'data_preparation_profiles' script
 dat <- read.csv(paste0("02-Outputs/",i,"_dat_train.csv"))
 names(dat)
@@ -64,7 +64,7 @@ dat <- st_as_sf(dat,
 
 
 # Extract values from covariates to the soil points
-pv <- extract(x = covs, y = vect(dat),xy=F)
+pv <- extract(x = covs_all, y = vect(dat),xy=F)
 dat <- cbind(dat,pv)
 
 summary(dat)
@@ -74,7 +74,7 @@ dat <-as.data.frame(dat)
 dat[, 'geometry'] <-NULL
 
 dat <- dat[complete.cases(dat),]
-
+rm(covs_all)
 # Defined formulas and QRF parameters
 fitControl <- trainControl(method = "repeatedcv",
                            number = 10,         ## 10 -fold CV
@@ -82,7 +82,7 @@ fitControl <- trainControl(method = "repeatedcv",
                            verboseIter = TRUE,
                            returnData = TRUE)
 
-fm = as.formula(paste(i," ~", paste0(names(covs)[!names(covs)%in% names(covs_pc)],
+fm = as.formula(paste(i," ~", paste0(names(covs),
                                      collapse = "+")))
 
 fm_pc = as.formula(paste(i," ~", paste0(names(covs_pc),
@@ -96,7 +96,7 @@ registerDoParallel(cl)
 
 #Correlation covariates
 model <- caret::train(fm,
-                      data = dat[, c(i,names(covs)[!names(covs)%in% names(covs_pc)])],
+                      data = dat[, c(i,names(covs))],
                       method = "qrf",
                       trControl = fitControl,
                       verbose = TRUE,
@@ -112,7 +112,7 @@ model$importance <-
   arrange(desc(IncNodePurity))
 
 # print(model)
-saveRDS(model, file = paste0("02-Outputs/model_", soilatt[i], ".rds"))
+saveRDS(model, file = paste0("02-Outputs/model_",i, ".rds"))
 
 #PC covariates
 model_pc <- caret::train(fm_pc,
@@ -166,22 +166,26 @@ if(max(model$results$MAE)<max(model_pc$results$MAE)){
 
 if(mod_sel$model > mod_sel$model_pc){
   mod_sel <- 'Model based on correlated covaraites'
-  final_mod <-'model_'
+  final_mod <-model
+  rm(model_pc)
 }else{
   mod_sel <- 'Model based on PCs'
-  final_mod <-'model_PC_'
+  final_mod <-model_pc
+  rm(model)
 }
 
 print(paste('Final Model to select:',mod_sel ))
-model$results
-model_pc$results
+final_mod$results
+
+
+
+
 }
 
-# Predict and map selected soil attributes with the best model ----
-# Make tiles to run model in parallel
-r <-rast(covs[[1]])
+  
+r <-covs[[1]]
 t <- rast(nrows = 5, ncols = 5, extent = ext(r), crs = crs(r))
-  tile <- makeTiles(r, t,overwrite=TRUE,filename="02-Outputs/tiles/tiles.tif")
+tile <- makeTiles(r, t,overwrite=TRUE,filename="02-Outputs/tiles/tiles.tif")
 
   
 
@@ -194,24 +198,50 @@ for (j in seq_along(tile)) {
    t <- rast(tile[j])
  covst <- crop(covs, t)
 
- names(covst)
+
   # plot(r)# 
-  pred_mean <- predict(covst, model = model, na.rm=TRUE,  
+  pred_mean <- predict(covst, model = final_mod, na.rm=TRUE,  
                        cpkgs="randomForest", what="mean",
-                       filename = paste0("02-Outputs/Final Maps/tiles/", i,"_tile_", j, ".tif"),
+                      # filename = paste0("02-Outputs/Final Maps/tiles/", i,"_tile_", j, ".tif"),
                        overwrite = TRUE)
-  pred_sd <- predict(covst, model = model, na.rm=TRUE,  
-                     cpkgs="randomForest", what="sd",
-                     filename = paste0("02-Outputs/Final Maps/tiles/", i,"_tile_SD_", j, ".tif"),
-                     overwrite = TRUE)                
+  pred_sd <- predict(covst, model = final_mod, na.rm=TRUE,  
+                     cpkgs="randomForest", type='sd')  
+  
+  writeRaster(pred_mean, filename = paste0("02-Outputs/Final Maps/tiles/", i,"_tile_", j, ".tif"), 
+              overwrite = TRUE)
+  writeRaster(pred_sd, filename = paste0("02-Outputs/Final Maps/tiles/", i,"_tileSD", j, ".tif"), 
+              overwrite = TRUE)
             
   rm(pred_mean)
   rm(pred_sd)
-  gc()
-  print(paste("tile",tile$lyr.1[j]))
+
+  
+  print(paste("tile",tile[j]))
 }
-  
 
+#Merge tiles both prediction and st.Dev
+f_mean <- list.files(path = "02-Outputs/Final Maps/tiles/", pattern = "tile_", full.names = TRUE)
+f_sd <- list.files(path = "02-Outputs/Final Maps/tiles/", pattern = "tileSD", full.names = TRUE)
+r_mean_l <- list()
+r_sd_l <- list()
+for (i in 1:length(f_mean)){
   
-  
+  r <- rast(f_mean[i])
+  r_mean_l[i] <-r
+rm(r)
+}
 
+for (i in 1:length(f_sd)){
+  
+  r <- rast(f_sd[i])
+  r_sd_l[i] <-r
+  rm(r)
+}
+
+r_mean <-sprc(r_mean_l)
+r_sd <-sprc(r_sd_l)
+pred_mean <- mosaic(r_mean)
+pred_sd <- mosaic(r_sd)
+
+plot(pred_mean)
+plot(pred_sd)

@@ -19,8 +19,8 @@ gc()
 #  User defined variables:
 
 # Working directory
-# wd <- 'C:/Users/luottoi/Documents/GitHub/Digital-Soil-Mapping'
-wd <- 'C:/Users/hp/Documents/GitHub/Digital-Soil-Mapping'
+wd <- 'C:/Users/luottoi/Documents/GitHub/Digital-Soil-Mapping'
+#wd <- 'C:/Users/hp/Documents/GitHub/Digital-Soil-Mapping'
 
 # Folder to store global layers from Zenodo
 #output_dir <-'C:/Users/hp/Documents/FAO/data/OpenLandMap/'
@@ -234,7 +234,7 @@ plot(tageer)
 
 
 
-writeRaster(tageer, '01-Data/covs/Terrain_attributes.tif', overwrite=T)
+writeRaster(tageer, '01-Data/covs/Terrain.tif', overwrite=T)
 
 # EVI & NDVI ----
 EVI <- ee$ImageCollection("MODIS/061/MOD13Q1") %>%
