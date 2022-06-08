@@ -19,12 +19,12 @@ gc()
 #  User defined variables:
 
 # Working directory
-wd <- 'C:/Users/luottoi/Documents/GitHub/Digital-Soil-Mapping'
-#wd <- 'C:/Users/hp/Documents/GitHub/Digital-Soil-Mapping'
+#wd <- 'C:/Users/luottoi/Documents/GitHub/Digital-Soil-Mapping'
+wd <- 'C:/Users/hp/Documents/GitHub/Digital-Soil-Mapping'
 
 # Folder to store global layers from Zenodo
-#output_dir <-'C:/Users/hp/Documents/FAO/data/OpenLandMap/'
-output_dir <-'C:/Users/luottoi/Documents/data/OpenLandMap/'
+output_dir <-'C:/Users/hp/Documents/FAO/data/OpenLandMap/'
+#output_dir <-'C:/Users/luottoi/Documents/data/OpenLandMap/'
 
 # Area of interest
 AOI <- '01-Data/MKD.shp'
@@ -44,7 +44,7 @@ resOLM <- '1km'
 
 # Load libraries ----
 library(data.table)
-library(terra)
+library(raster)
 library(sf)
 library(rgee)
 library(zen4R)
@@ -473,13 +473,25 @@ covs <- rast(covs)
 covs <- crop(covs, AOI)
 covs <- mask(covs, AOI)
 
+
 #Use one rgee raster to harmonize the covs
 rgee <-rast('01-Data/covs/Prr.tif')
 covs <- resample(covs, rgee)
 
-writeRaster(covs, '01-Data/covs/olm_covs.tif', overwrite=T)  
+writeRaster(covs[[1]], '01-Data/covs/olm_covs.tif', overwrite=T)  
 covs <- stack(covs)
 
+# Upload clipped zenodo covs to gee  ----
+# 3. Convert a stars(raster) to ee$Image
+x <-'01-Data/covs/olm_covs.tif'
+x <- read_stars(x)
+assetId <- sprintf("%s/%s",ee_get_assethome(),'projects/secret-opus-351513')
+ee_zenodo <- raster_as_ee(
+  x = x,
+  assetId = assetId,
+  overwrite = TRUE,
+  bucket = "gsprgeekey"
+)
 
 ###########################################################################
 # Export PCs based on Principle Component Analysis ----

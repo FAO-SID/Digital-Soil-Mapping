@@ -17,8 +17,8 @@ gc()
 #  User defined variables: ----
 
 # Working directory
-wd <- 'C:/Users/luottoi/Documents/GitHub/Digital-Soil-Mapping'
-#wd <- 'C:/Users/hp/Documents/GitHub/Digital-Soil-Mapping'
+#wd <- 'C:/Users/luottoi/Documents/GitHub/Digital-Soil-Mapping'
+wd <- 'C:/Users/hp/Documents/GitHub/Digital-Soil-Mapping'
 #List of soil attributes prepared in script #2
 soilatt <- c('OCS','clay', 'pH')
 #
@@ -51,7 +51,7 @@ for (i in unique(soilatt)){
 
 # Load the processed data for digital soil mapping. 
 # This table was prepared in the 'data_preparation_profiles' script
-dat <- fread(paste0("02-Outputs/",i,"_dat_train.csv"))
+dat <- fread(paste0("02-Outputs/",i,"_dat.csv"))
 
 #Use coordinates to turn point data into a vector with coordinates
 # WGS84

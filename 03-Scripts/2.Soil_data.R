@@ -18,8 +18,8 @@ gc()
 #  User defined variables:
 
 # Working directory
- wd <- 'C:/Users/luottoi/Documents/GitHub/Digital-Soil-Mapping'
-#wd <- 'C:/Users/hp/Documents/GitHub/Digital-Soil-Mapping'
+ #wd <- 'C:/Users/luottoi/Documents/GitHub/Digital-Soil-Mapping'
+wd <- 'C:/Users/hp/Documents/GitHub/Digital-Soil-Mapping'
 
 #
 #
@@ -29,6 +29,7 @@ gc()
 # Load libraries ----
 library(data.table)
 library(mpspline2)
+
 
 # Set working directory Module I ----
 setwd(wd)
@@ -320,33 +321,9 @@ hist(dat$OCS, breaks = 50)
 dat <- dat[complete.cases(dat$OCS),]
 
 
+# Save the datasets as .csv table
+write.csv(dat, file="02-Outputs/OCS_dat.csv", row.names = FALSE)
 
-############ Splitting the dataset in calibraition (training the model) and validation (testing the model) ##############
-
-library(caret)
-
-# Define the random numbers table (to get reproducible result)
-set.seed(26522)
-
-# Create random selection of 75% of the data as 'train' dataset and 25% as 'test' dataset
-train.ind <- createDataPartition(1:nrow(dat), p = .75, list = FALSE)
-train <- dat[ train.ind,]
-test  <- dat[-train.ind,]
-
-# Check if both 'train' and 'test datasets' have similar distributions
-summary(train$OCS)
-summary(test$OCS)
-
-plot(density (train$OCS), col='red',
-     main='Statistical distribution of train and test datasets')
-lines(density(test$OCS), col='blue')
-legend('topright', legend=c("train", "test"),
-       col=c("red", "blue"), lty=1, cex=1.5)
-
-# Save the 'train' and 'test' datasets as .csv tables
-
-write.csv(train, file="02-Outputs/OCS_dat_train.csv", row.names = FALSE)
-write.csv(test, file="02-Outputs/OCS_dat_test.csv", row.names = FALSE)
 
 # Clay ----
 
@@ -401,27 +378,10 @@ dat <- dat[dat$clay>0,]
 dat$clay <- as.numeric(dat$clay)
 
 
-############ Splitting the dataset in calibraition (training the model) and validation (testing the model) ##############
+# Save the dataset as .csv table
 
-# Create random selection of 75% of the data as 'train' dataset and 25% as 'test' dataset
-train.ind <- createDataPartition(1:nrow(dat), p = .75, list = FALSE)
-train <- dat[ train.ind,]
-test  <- dat[-train.ind,]
+write.csv(dat, file="02-Outputs/clay_dat.csv", row.names = FALSE)
 
-# Check if both 'train' and 'test datasets' have similar distributions
-summary(train$clay)
-summary(test$clay)
-
-plot(density (train$clay), col='red',
-     main='Statistical distribution of train and test datasets')
-lines(density(test$clay), col='blue')
-legend('topright', legend=c("train", "test"),
-       col=c("red", "blue"), lty=1, cex=1.5)
-
-# Save the 'train' and 'test' datasets as .csv tables
-
-write.csv(train, file="02-Outputs/clay_dat_train.csv", row.names = FALSE)
-write.csv(test, file="02-Outputs/clay_dat_test.csv", row.names = FALSE)
 
 # pH ----
 
@@ -475,24 +435,6 @@ dat <- dat[dat$pH>0,]
 dat$pH <- as.numeric(dat$pH)
 
 
-############ Splitting the dataset in calibraition (training the model) and validation (testing the model) ##############
+# Save the  dataset as .csv table
+write.csv(dat, file="02-Outputs/pH_dat.csv", row.names = FALSE)
 
-# Create random selection of 75% of the data as 'train' dataset and 25% as 'test' dataset
-train.ind <- createDataPartition(1:nrow(dat), p = .75, list = FALSE)
-train <- dat[ train.ind,]
-test  <- dat[-train.ind,]
-
-# Check if both 'train' and 'test datasets' have similar distributions
-summary(train$pH)
-summary(test$pH)
-
-plot(density (train$pH), col='red',
-     main='Statistical distribution of train and test datasets')
-lines(density(test$pH), col='blue')
-legend('topright', legend=c("train", "test"),
-       col=c("red", "blue"), lty=1, cex=1.5)
-
-# Save the 'train' and 'test' datasets as .csv tables
-
-write.csv(train, file="02-Outputs/pH_dat_train.csv", row.names = FALSE)
-write.csv(test, file="02-Outputs/pH_dat_test.csv", row.names = FALSE)
