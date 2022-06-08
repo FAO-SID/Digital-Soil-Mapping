@@ -17,8 +17,8 @@ gc()
 #  User defined variables: ----
 
 # Working directory
-#wd <- 'C:/Users/luottoi/Documents/GitHub/Digital-Soil-Mapping'
-wd <- 'C:/Users/hp/Documents/GitHub/Digital-Soil-Mapping'
+wd <- 'C:/Users/luottoi/Documents/GitHub/Digital-Soil-Mapping'
+#wd <- 'C:/Users/hp/Documents/GitHub/Digital-Soil-Mapping'
 
 AOI <- '01-Data/MKD.shp'
 #

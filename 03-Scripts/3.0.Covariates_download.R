@@ -19,12 +19,12 @@ gc()
 #  User defined variables:
 
 # Working directory
-#wd <- 'C:/Users/luottoi/Documents/GitHub/Digital-Soil-Mapping'
-wd <- 'C:/Users/hp/Documents/GitHub/Digital-Soil-Mapping'
+wd <- 'C:/Users/luottoi/Documents/GitHub/Digital-Soil-Mapping'
+#wd <- 'C:/Users/hp/Documents/GitHub/Digital-Soil-Mapping'
 
 # Folder to store global layers from Zenodo
-output_dir <-'C:/Users/hp/Documents/FAO/data/OpenLandMap/'
-#output_dir <-'C:/Users/luottoi/Documents/data/OpenLandMap/'
+#output_dir <-'C:/Users/hp/Documents/FAO/data/OpenLandMap/'
+output_dir <-'C:/Users/luottoi/Documents/data/OpenLandMap/'
 
 # Area of interest
 AOI <- '01-Data/MKD.shp'
@@ -212,7 +212,7 @@ TAGEE <- import("tagee")
 image <- ee$Image("MERIT/DEM/v1_0_3") %>%
   ee$Image$clip(region)%>%
   ee$Image$toDouble()
- 
+
 
 image = image$resample('bilinear')$reproject(
   crs= crs,
@@ -478,21 +478,16 @@ covs <- mask(covs, AOI)
 rgee <-rast('01-Data/covs/Prr.tif')
 covs <- resample(covs, rgee)
 
-writeRaster(covs[[1]], '01-Data/covs/olm_covs.tif', overwrite=T)  
-covs <- stack(covs)
+writeRaster(covs, '01-Data/covs/olm_covs.tif', overwrite=T)  
 
-# Upload clipped zenodo covs to gee  ----
-# 3. Convert a stars(raster) to ee$Image
-x <-'01-Data/covs/olm_covs.tif'
-x <- read_stars(x)
-assetId <- sprintf("%s/%s",ee_get_assethome(),'projects/secret-opus-351513')
-ee_zenodo <- raster_as_ee(
-  x = x,
-  assetId = assetId,
-  overwrite = TRUE,
-  bucket = "gsprgeekey"
-)
 
+# Upload the raster stack to gee through the code editor https://code.earthengine.google.com/
+# create image from asset
+# 1. Create a folder
+# Change path asset according to your specific user
+# Obtain your asset home name
+
+olm <-ee$Image('users/IsaLuotto/olm_covs')
 ###########################################################################
 # Export PCs based on Principle Component Analysis ----
 
@@ -503,13 +498,13 @@ SG <-
 
 SG <-SG$addBands(NDVI)$addBands(land_red)$addBands(sd_d_T)$addBands(land_nir)
 
-SG <-SG$addBands(fapar)$addBands(soil_wt)$addBands(top_pos)
+SG <-SG$addBands(fapar)$addBands(soil_wt)$addBands(top_pos)$addBands(olm)
+
 
 
 
 class(SG)
-metadata <- SG$propertyNames()
-cat("Metadata: ", paste(metadata$getInfo(),"\n",collapse = " "))
+
 inputBandNames <- SG$bandNames()$getInfo()
 print(inputBandNames)
 
@@ -528,8 +523,8 @@ SGsd <- SG$reduceRegion(ee$Reducer$stdDev(),
                         geometry = region, scale = scale, bestEffort = TRUE)
 head(SGsd$getInfo(),3)
 
-saveRDS(as.vector(SGmean$getInfo()), file = "./inputBandMeans.rds")
-saveRDS(as.vector(SGsd$getInfo()), file = "./inputBandSDs.rds")
+# saveRDS(as.vector(SGmean$getInfo()), file = "./inputBandMeans.rds")
+# saveRDS(as.vector(SGsd$getInfo()), file = "./inputBandSDs.rds")
 
 SGmean.img <- ee$Image$constant(SGmean$values(inputBandNames))
 SGsd.img <- ee$Image$constant(SGsd$values(inputBandNames))
@@ -600,7 +595,7 @@ print(round(evsum,1))
 cat(npc95 <- which(evsum > 95)[1],
     "PCs are needed to explain 95% of the variance")
 
-saveRDS(eigenValues.vect, file = "./eigenValuesVector.rds")
+#saveRDS(eigenValues.vect, file = "./eigenValuesVector.rds")
 
 
 # The eigenvectors (rotations); this is a PxP matrix with eigenvectors in rows.
@@ -616,7 +611,7 @@ print(data.frame(band=inputBandNames,
 
 #export the eigenvectors ----
 eVm <- matrix(unlist(eigenVectors$getInfo()), byrow = TRUE, nrow = dimOne)
-saveRDS(eVm, file = "./eigenvectorMatrix.rds")
+#saveRDS(eVm, file = "./eigenvectorMatrix.rds")
 
 arrayImage <- arrays$toArray(1L)
 PCsMatrix <- ee$Image(eigenVectors)$matrixMultiply(arrayImage)
