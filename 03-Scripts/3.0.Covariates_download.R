@@ -83,15 +83,15 @@ AOI <- read_sf(AOI)
 # Multi-Scale Topographic Position Index
 
 
-
-
-# Mean annual temperature (daytime) ----
+#Initial setup and turn shp into gee geometry----
 ee_Initialize()
 
 
 region <- sf_as_ee(AOI)
 region = region$geometry()
 
+
+# Mean annual temperature (daytime) ----
 
 image1 <- ee$ImageCollection("IDAHO_EPSCOR/TERRACLIMATE") %>%
   ee$ImageCollection$filterDate(start_T, end_T) %>%
@@ -103,6 +103,7 @@ image1 <- ee$ImageCollection("IDAHO_EPSCOR/TERRACLIMATE") %>%
 image2 <- ee$ImageCollection("IDAHO_EPSCOR/TERRACLIMATE") %>%
   ee$ImageCollection$filterDate(start_T, end_T) %>%
   ee$ImageCollection$select("tmmn")%>%
+  ee$ImageCollection$filterBounds(region)%>%
   ee$ImageCollection$toBands()
 
 
@@ -130,7 +131,7 @@ avtr <- ee_as_raster(
 
 writeRaster(avtr, '01-Data/covs/avtr.tif', overwrite=T)
 
-# Total annual Precipitation ----
+# Total Annual Precipitation ----
 
 image <- ee$ImageCollection("IDAHO_EPSCOR/TERRACLIMATE") %>%
   ee$ImageCollection$filterDate(start_T, end_T) %>%
@@ -243,17 +244,17 @@ EVI <- ee$ImageCollection("MODIS/061/MOD13Q1") %>%
   ee$ImageCollection$filterBounds(region)%>%
   ee$ImageCollection$toBands()
 
-EVI = EVI$reduce(ee$Reducer$mean())
-
-EVI = EVI$resample('bilinear')$reproject(
-  crs= crs,
-  scale= res)
-
 NDVI <- ee$ImageCollection("MODIS/061/MOD13Q1") %>%
   ee$ImageCollection$filterDate(start_T, end_T) %>%
   ee$ImageCollection$select("NDVI")%>%
   ee$ImageCollection$filterBounds(region)%>%
   ee$ImageCollection$toBands()
+
+EVI = EVI$reduce(ee$Reducer$mean())
+
+EVI = EVI$resample('bilinear')$reproject(
+  crs= crs,
+  scale= res)
 
 NDVI = NDVI$reduce(ee$Reducer$mean())
 
@@ -279,7 +280,7 @@ evir <- ee_as_raster(
 writeRaster(ndvir, '01-Data/covs/NDVI.tif', overwrite=T)
 writeRaster(evir, '01-Data/covs/EVI.tif', overwrite=T)
 
-# Land daytime surface temperature (SD) ----
+# Land daytime surface temperature (st.D) ----
 
 image <- ee$ImageCollection("MODIS/061/MOD11A1") %>%
   ee$ImageCollection$filterDate("2018-01-01", "2018-12-31") %>%
@@ -294,15 +295,15 @@ sd_d_T = sd_d_T$resample('bilinear')$reproject(
   crs= crs,
   scale= res)
 
-sd_d_Tr <- ee_as_raster(
-  image = sd_d_T,
-  scale= res,
-  region = region,
-  via = "drive"
-)
-
-
-writeRaster(sd_d_Tr, '01-Data/covs/sd_d_Tr.tif', overwrite=T)
+# sd_d_Tr <- ee_as_raster(
+#   image = sd_d_T,
+#   scale= res,
+#   region = region,
+#   via = "drive"
+# )
+# 
+# 
+# writeRaster(sd_d_Tr, '01-Data/covs/sd_d_Tr.tif', overwrite=T)
 
 # Landsat bands mean and sd ----
 image <- ee$ImageCollection("LANDSAT/LC08/C02/T1_RT") %>%
