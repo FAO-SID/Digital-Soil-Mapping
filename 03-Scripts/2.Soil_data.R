@@ -18,8 +18,8 @@ gc()
 #  User defined variables:
 
 # Working directory
- #wd <- 'C:/Users/luottoi/Documents/GitHub/Digital-Soil-Mapping'
-wd <- 'C:/Users/hp/Documents/GitHub/Digital-Soil-Mapping'
+wd <- 'C:/Users/luottoi/Documents/GitHub/Digital-Soil-Mapping'
+#wd <- 'C:/Users/hp/Documents/GitHub/Digital-Soil-Mapping'
 
 #
 #
@@ -113,7 +113,8 @@ dat <- dat[!(dat$BLD>=2.5 & !is.na(dat$BLD)),]
 
 # BLD values lower than 1 g?cm3 can only correspond to organic soils (Histosols)
 # We should check if all low BLD values correspond to Histosols
-summary(dat[dat$BLD<1,])
+dat[dat$BLD<1 & complete.cases(dat$BLD),'soil']
+
 
 # Explore and clean coarse fragments data
 summary(dat$CRF)
@@ -342,7 +343,7 @@ out <- boxplot(dat$clay, horizontal=TRUE)$out
 dat <- dat[!(dat$clay %in% out),]
 
 
-################################ Calculating clay stocks for standard topsoil depth 0-30cm #######################
+################################ Calculating clay  for standard topsoil depth 0-30cm #######################
 
 dat <-
   dat[, c("id","top","bottom","clay","BLD","CRF","X",  "Y", "soil")]
@@ -399,7 +400,7 @@ out <- boxplot(dat$pH, horizontal=TRUE)$out
 dat <- dat[!(dat$pH %in% out),]
 
 
-################################ Calculating pH stocks for standard topsoil depth 0-30cm #######################
+################################ Calculating pH  for standard topsoil depth 0-30cm #######################
 
 dat <-
   dat[, c("id","top","bottom","pH","BLD","CRF","X",  "Y", "soil")]
