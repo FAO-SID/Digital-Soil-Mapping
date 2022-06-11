@@ -66,18 +66,18 @@ rgee_environment_dir = 'C:\\Users\\luottoi\\Miniconda3\\envs\\rgee_py'
 ## if you installed everything above, you can now install the packages inside R
 
 # install/load general packages used in the scripts
-# p_load(raster,
-#        rgdal,
-#        rgeos,
-#        gdalUtils,
-#        sp,
-#        sf,
-#        leaflet,
-#        mapview,
-#        caret)
+p_load(raster,
+       rgdal,
+       rgeos,
+       gdalUtils,
+       sp,
+       sf,
+       leaflet,
+       mapview,
+       caret)
 
 # now some more specific packages related to using the rgee
-#p_load(rgee, geojsonio, remotes, reticulate, devtools, googledrive)
+p_load(rgee, geojsonio, remotes, reticulate, devtools, googledrive)
 install.packages("rgee")
 
 ## sometimes at this point you are required to restart R or the computer before proceeding
