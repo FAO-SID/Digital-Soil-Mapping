@@ -45,6 +45,7 @@ resOLM <- '1km'
 # Load libraries ----
 library(data.table)
 library(raster)
+library(terra)
 library(sf)
 library(rgee)
 library(zen4R)
