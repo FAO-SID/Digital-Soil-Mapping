@@ -85,6 +85,9 @@ install.packages("rgee")
 
 # set python
 #reticulate::use_python(rgee_environment_dir, required=T)
+library(reticulate)
+Sys.setenv(RETICULATE_PYTHON='C:/Users/hp/anaconda3/envs/rgee_py/python.exe')
+
 rgee::ee_install_set_pyenv(
   py_path = rgee_environment_dir, # Change it for your own Python PATH
   py_env = "rgee_py" # Change it for your own Python ENV
