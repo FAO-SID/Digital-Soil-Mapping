@@ -1,0 +1,104 @@
+\mainmatter
+\pagestyle{fancy}
+\setlength{\headheight}{20.39996pt}
+
+# Background
+
+## The importance of soil organic carbon
+
+
+
+## Objectives of soil organic carbon mapping
+
+This is a citation [@xie2015].
+
+## Data policy
+
+### Data sharing principles
+
+The GSP Data Policy has been endorsed by partners of the Global Soil
+Partnership during the 5th GSP Plenary Assembly in June 2017
+(GSP & FAO, 2017) in order to promote and govern soil data sharing for data
+products including GSOCmap contributions, and considering harmonization
+and interoperability requirements.\
+The GSP data policy aims to ensure that:
+
+-   every existing ownership right to shared soil data are respected;
+
+-   the specific level of access and the conditions for data sharing are
+    clearly specified;
+
+-   the ownership of each dataset and web service are properly
+    acknowledged and well-referenced; and
+
+-   the data owners are protected from any liability arising from the
+    use of their original and/or derived data.
+
+It is recommended that data owners comply with the following open data
+principles:
+
+1.  Accessibility: the data shall be divulged through the Internet (web
+    services).
+
+2.  Availability: the data is presented in a convenient,
+    platform-independent, and in line with standard formats (e.g. web
+    feature service WFS).
+
+3.  License: the formal concession of the usage and access rights over
+    the data shared.
+
+4.  Cost: data shall be shared free of cost, or at no more than a
+    reasonable reproduction cost, preferably by downloading it from the
+    Internet.
+
+5.  Re-use and Redistribution: data must be provided and licensed under
+    terms that permit its reuse and redistribution, including
+    intermixing with other datasets.
+
+6.  Global benefit: any user must be able to access, use and
+    redistribute data of the Global Soil Information System. However,
+    inherited restrictions by national data policies shall be accepted.
+
+7.  Metadata: data describing the products of the Global Soil
+    Information System will by default be open for access.
+
+The data shared by the countries shall contain the relevant soil
+information representative for the area portrayed. The shared datasets
+contain the best available information for a given area and topic,
+however, they are subject to potential restrictions based on the
+institutions' or countries' data policy.\
+The data shared by the countries should be quality controlled which
+means that the data have been technically evaluated to ensure data
+integrity, correctness, and completeness; errors and omissions are
+identified and, if possible, addressed.\
+
+### Ownership, data rights and citation
+
+In the case of original data, the rightful data owner keeps full
+ownership of it. All intellectual property rights (IPR) and copyrights
+pertaining to the data owner remain intact and are respected by the soil
+data facility (SDF) host. All data providers must communicate to the SDI
+host their IPR and data use policies. Thus, the ownership of all data
+made available through the GSP soil portal need to be clearly specified.
+This is an important prerequisite to allow this data to be accessible
+through the soil SDF.\
+In the case of derived data, the deriving institution becomes the
+rightful owner. However, all original data must be accredited and
+correctly cited. According to the Pillar 4 Implementation Plan, each
+global-level derived GSP data product will be quality-assured by the
+Pillar 4 Working Group. This includes agreements about the correct
+citation.\
+The data owner shall ensure that the data shared can be used and
+interpreted by the authorized users in general; this includes providing
+the proper citations, as well as providing information over the
+ownership of such data for acknowledgement purposes. Users shall
+acknowledge the source of data provided through the Global Soil
+Information System.\
+All providers of original data (data owners) are responsible to define
+and clarify the IPR and licensing. Any user of this data, such as the
+SDF host, has to respect the national data policies and/or licensing
+involved with the retrieval of the respective web services. In the case
+of data provided to the central repository, a bilateral
+agreement/license may be required (between the national data owner and
+SDF host), depending on and in conformity with national rules.\
+More information about the data policy can be accessed at GSP & FAO (2017).
