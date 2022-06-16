@@ -19,8 +19,8 @@ gc()
 #  User defined variables:
 
 # Working directory
-wd <- 'C:/Users/luottoi/Documents/GitHub/Digital-Soil-Mapping'
-#wd <- 'C:/Users/hp/Documents/GitHub/Digital-Soil-Mapping'
+#wd <- 'C:/Users/luottoi/Documents/GitHub/Digital-Soil-Mapping'
+wd <- 'C:/Users/hp/Documents/GitHub/Digital-Soil-Mapping'
 
 # Folder to store global layers from Zenodo
 #output_dir <-'C:/Users/hp/Documents/FAO/data/OpenLandMap/'
@@ -93,6 +93,9 @@ region = region$geometry()
 
 
 # Mean annual temperature (daytime) ----
+# Go to https://code.earthengine.google.com/
+# browse for the dataset you're interested in
+# find and copy/paste the path  
 
 image1 <- ee$ImageCollection("IDAHO_EPSCOR/TERRACLIMATE") %>%
   ee$ImageCollection$filterDate(start_T, end_T) %>%
@@ -123,12 +126,13 @@ avT = avT$resample('bilinear')$reproject(
   crs= crs,
   scale= res)
 
-avtr <- ee_as_raster(
-  image = avT,
-  scale= res,
-  region = region,
-  via = "drive"
-)
+# CTRL + shift + C to comment
+# avtr <- ee_as_raster(
+#   image = avT,
+#   scale= res,
+#   region = region,
+#   via = "drive"
+# )
 
 writeRaster(avtr, '01-Data/covs/avtr.tif', overwrite=T)
 

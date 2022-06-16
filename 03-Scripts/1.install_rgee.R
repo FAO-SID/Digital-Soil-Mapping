@@ -41,7 +41,7 @@ library(pacman)
 ## copy the path to the rgee_py environment, you will need it set in the variable below inside R:
 ## note the use of double backslashes \\ 
 ## this below is where is located in MY computer, you have to use the 'conda env list' command to find where it is located on yours
-rgee_environment_dir = 'C:/Users/hp/.conda/envs/rgee_py/'
+rgee_environment_dir = 'C:\\Users\\hp\\.conda\\envs\\rgee_py'
 
 
 

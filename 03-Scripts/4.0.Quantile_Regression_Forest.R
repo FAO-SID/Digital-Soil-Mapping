@@ -69,7 +69,7 @@ library(doParallel)
   
   dat <- dat[complete.cases(dat),]
   rm(covs_all)
-  # Define a formila  and QRF parameters (set 3 times repeated 10-fold cross-validation)
+  # Define a formula  and QRF parameters (set 3 times repeated 10-fold cross-validation)
   fitControl <- trainControl(method = "repeatedcv",
                              number = 10,         ## 10 -fold CV
                              repeats = 3,        ## repeated 3 times
