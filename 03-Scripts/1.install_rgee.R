@@ -66,27 +66,18 @@ rgee_environment_dir = 'C:\\Users\\hp\\.conda\\envs\\rgee_py'
 ## if you installed everything above, you can now install the packages inside R
 
 # install/load general packages used in the scripts
-p_load(raster,
-       rgdal,
-       rgeos,
-       gdalUtils,
-       sp,
-       sf,
-       leaflet,
-       mapview,
-       caret)
 
 # now some more specific packages related to using the rgee
-p_load(rgee, geojsonio, remotes, reticulate, devtools, googledrive)
-install.packages("rgee")
+p_load(remotes, geojsonio, remotes, reticulate, devtools, googledrive,gdalUtils, stars)
+
+# Install the latest rgee version directly from github
+install_github("r-spatial/rgee")
 
 ## sometimes at this point you are required to restart R or the computer before proceeding
 ## try restarting if the installation do not finish properly and run the installation again after restart
 
 # set python
-#reticulate::use_python(rgee_environment_dir, required=T)
-library(reticulate)
-Sys.setenv(RETICULATE_PYTHON='C:/Users/hp/.conda/envs/rgee_py/python.exe')
+Sys.setenv(RETICULATE_PYTHON=paste0(rgee_environment_dir,'python.exe'))
 
 rgee::ee_install_set_pyenv(
   py_path = rgee_environment_dir, # Change it for your own Python PATH
