@@ -89,11 +89,11 @@ x <- x[with(x, order(-abs(x$value))),]
 selection <- as.character(x$X2)
 
 # Leave only selected covariates in the 'covs' raster stack
-covs <- covs[[selection]]
-names(covs)
+covs_sel <- covs[[selection]]
+names(covs_sel)
 
 
-writeRaster(covs, file = paste0("02-Outputs/", i,"_covariates.tif"),overwrite=TRUE)
+writeRaster(covs_sel, file = paste0("02-Outputs/", i,"_covariates.tif"),overwrite=TRUE)
 print(i)
 }
 
