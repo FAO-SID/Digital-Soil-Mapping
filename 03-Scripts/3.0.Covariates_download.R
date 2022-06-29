@@ -127,12 +127,12 @@ avT = avT$resample('bilinear')$reproject(
   scale= res)
 
 # CTRL + shift + C to comment
-# avtr <- ee_as_raster(
-#   image = avT,
-#   scale= res,
-#   region = region,
-#   via = "drive"
-# )
+avtr <- ee_as_raster(
+  image = avT,
+  scale= res,
+  region = region,
+  via = "drive"
+)
 
 writeRaster(avtr, '01-Data/covs/avtr.tif', overwrite=T)
 
