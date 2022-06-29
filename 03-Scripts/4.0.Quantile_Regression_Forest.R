@@ -1,7 +1,7 @@
 #######################################################
 #
 # Quantile Regression Forest
-# Bulk soil attributes
+# Soil Property Mapping
 #
 # GSP-Secretariat
 # Contact: Isabel.Luotto@fao.org
@@ -21,6 +21,8 @@ wd <- 'C:/Users/luottoi/Documents/GitHub/Digital-Soil-Mapping'
 #wd <- 'C:/Users/hp/Documents/GitHub/Digital-Soil-Mapping'
 
 AOI <- '01-Data/MKD.shp'
+soilatt <- 'OCS'
+
 #
 #
 #######################################################
@@ -42,15 +44,15 @@ library(doParallel)
 # Calibrate QRF models, perform QA and select the best model ----
 
 #Load data and covariates stacks based on correlation
-covs <-rast( paste0("02-Outputs/OCS_covariates.tif"))
+covs <-rast( paste0("02-Outputs/",soilatt,"_covariates.tif"))
 # Load PC covariates (the same for all soil attributes)
 covs_pc <- rast('02-Outputs/PCA_covariates.tif')
 covs_all <-  c(covs, covs_pc)  
 # Load the processed data for digital soil mapping (Script 2)
-dat <- read.csv(paste0("02-Outputs/OCS_dat.csv"))
+dat <- read.csv(paste0("02-Outputs/",soilatt,"_dat.csv"))
 names(dat)
 
-# Promote dataframe to spatial
+# Promote dataframe to a spatial object
 projcrs <- "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
 dat <- st_as_sf(dat,                         
                 coords = c("X", "Y"),
@@ -69,6 +71,7 @@ dat[, 'geometry'] <-NULL
 
 dat <- dat[complete.cases(dat),]
 rm(covs_all)
+
 # Define a formula  and QRF parameters (set 3 times repeated 10-fold cross-validation)
 fitControl <- trainControl(method = "repeatedcv",
                            number = 10,         ## 10 -fold CV
@@ -76,11 +79,14 @@ fitControl <- trainControl(method = "repeatedcv",
                            verboseIter = TRUE,
                            returnData = TRUE)
 
-fm = as.formula(paste('OCS ~', paste0(names(covs),
+# Define formula for covariates
+fm = as.formula(paste(paste0(soilatt,' ~'), paste0(names(covs),
                                       collapse = "+")))
-
-fm_pc = as.formula(paste('OCS ~', paste0(names(covs_pc),
+# Define formula for PCs
+fm_pc = as.formula(paste(paste0(soilatt,' ~'), paste0(names(covs_pc),
                                          collapse = "+")))
+
+# mtry: Number of variables randomly sampled as candidates at each split
 tuneGrid <-  expand.grid(mtry = c(100, 200, 500))
 
 
@@ -92,7 +98,7 @@ registerDoParallel(cl)
 
 #Correlation covariates
 model <- caret::train(fm,
-                      data = dat[, c('OCS',names(covs))],
+                      data = dat[, c(soilatt,names(covs))],
                       method = "qrf",
                       trControl = fitControl,
                       verbose = TRUE,
@@ -108,11 +114,11 @@ model$importance <-
   arrange(desc(IncNodePurity))
 
 # print(model)
-saveRDS(model, file = paste0("02-Outputs/models/model_OCS.rds"))
+saveRDS(model, file = paste0("02-Outputs/models/model_",soilatt,".rds"))
 
 #PC covariates
 model_pc <- caret::train(fm_pc,
-                         data = dat[, c('OCS', names(covs_pc))],
+                         data = dat[, c(soilatt, names(covs_pc))],
                          method = "qrf",
                          trControl = fitControl,
                          verbose = TRUE,
@@ -128,15 +134,15 @@ model_pc$importance <-
   arrange(desc(IncNodePurity))
 
 # print(model)
-saveRDS(model_pc, file = "02-Outputs/models/model_PC_OCS.rds")
+saveRDS(model_pc, file =  paste0("02-Outputs/models/model_PC_",soilatt,".rds"))
 
 stopCluster(cl)
 gc()
 
 
 #Quality Assuarance (RMSE,Rsquared,MAE) ----
-model_pc <-readRDS(file = "02-Outputs/models/model_PC_OCS.rds")
-model <-readRDS(file = "02-Outputs/models/model_OCS.rds")
+model_pc <-readRDS(file = paste0("02-Outputs/models/model_PC_",soilatt,".rds"))
+model <-readRDS(file = paste0("02-Outputs/models/model_",soilatt,".rds"))
 
 
 #Select final model (PC vs correlation) based on RMSE,Rsquared,MAE
@@ -164,7 +170,7 @@ if(max(model$results$MAE)<max(model_pc$results$MAE)){
 if(mod_sel$model > mod_sel$model_pc){
   mod_sel <- 'Model based on correlated covaraites'
   final_mod <-model$finalModel
-  write.csv(model$results, paste0('02-Outputs/OCS_model_stats.csv'))
+  write.csv(model$results, paste0('02-Outputs/',soilatt,'_model_stats.csv'))
   stats <-model$results
   VarImportance <- model$importance
   
@@ -177,7 +183,7 @@ if(mod_sel$model > mod_sel$model_pc){
 }else{
   mod_sel <- 'Model based on PCs'
   final_mod <-model_pc$finalModel
-  write.csv(model_pc$results, paste0('02-Outputs/OCS_model_pc_stats.csv'))
+  write.csv(model_pc$results, paste0('02-Outputs/',soilatt,'_model_pc_stats.csv'))
   stats <-model_pc$results
   VarImportance <- model_pc$importance
   covs <- covs_pc
@@ -232,9 +238,9 @@ for (j in seq_along(tile)) {
   
   
   
-  writeRaster(pred_mean, filename = paste0("02-Outputs/tiles/soilatt_tiles/OCS_tile_", j, ".tif"), 
+  writeRaster(pred_mean, filename = paste0("02-Outputs/tiles/soilatt_tiles/",soilatt,"_tile_", j, ".tif"), 
               overwrite = TRUE)
-  writeRaster(pred_sd, filename = paste0("02-Outputs/tiles/soilatt_tiles/OCS_tileSD_", j, ".tif"), 
+  writeRaster(pred_sd, filename = paste0("02-Outputs/tiles/soilatt_tiles/",soilatt,"_tileSD_", j, ".tif"), 
               overwrite = TRUE)
   
   rm(pred_mean)
@@ -245,8 +251,8 @@ for (j in seq_along(tile)) {
 }
 
 #Merge tiles both prediction and st.Dev
-f_mean <- list.files(path = "02-Outputs/tiles/soilatt_tiles/", pattern = paste0("OCS_tile_"), full.names = TRUE)
-f_sd <- list.files(path = "02-Outputs/tiles/soilatt_tiles/", pattern =  paste0("OCS_tileSD_"), full.names = TRUE)
+f_mean <- list.files(path = "02-Outputs/tiles/soilatt_tiles/", pattern = paste0(soilatt,"_tile_"), full.names = TRUE)
+f_sd <- list.files(path = "02-Outputs/tiles/soilatt_tiles/", pattern =  paste0(soilatt,"_tileSD_"), full.names = TRUE)
 r_mean_l <- list()
 r_sd_l <- list()
 for (g in 1:length(f_mean)){
@@ -278,8 +284,8 @@ plot(pred_sd)
 
 
 # Export final rasters ---- 
-writeRaster(pred_mean, paste0("02-Outputs/maps/OCS_QRF.tif"),overwrite=TRUE)
-writeRaster(pred_sd, paste0("02-Outputs/maps/OCS_QRF_SD.tif"),overwrite=TRUE)
+writeRaster(pred_mean, paste0("02-Outputs/maps/",soilatt,"_QRF.tif"),overwrite=TRUE)
+writeRaster(pred_sd, paste0("02-Outputs/maps/",soilatt,"_QRF_SD.tif"),overwrite=TRUE)
 
 
 

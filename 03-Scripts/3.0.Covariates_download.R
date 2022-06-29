@@ -139,6 +139,8 @@ avT = avT$resample('bilinear')$reproject(
   crs= crs,
   scale= res)
 
+avT =avT$clip(region)
+
 # CTRL + shift + C to comment
 avtr <- ee_as_raster(
   image = avT,
@@ -162,6 +164,7 @@ Pr = image$resample('bilinear')$reproject(
   crs= crs,
   scale= res)
 
+Pr =Pr$clip(region)
 
 Prr <- ee_as_raster(
   image = Pr,
@@ -180,6 +183,8 @@ image <- ee$ImageCollection("IDAHO_EPSCOR/TERRACLIMATE") %>%
   ee$ImageCollection$select("pr")%>%
   ee$ImageCollection$filterBounds(region)%>%
   ee$ImageCollection$toBands()
+
+
 
 Prr_all = image$resample('bilinear')$reproject(
   crs= crs,
