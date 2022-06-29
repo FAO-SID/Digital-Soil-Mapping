@@ -26,8 +26,9 @@ wd <- 'C:/Users/hp/Documents/GitHub/Digital-Soil-Mapping'
 #output_dir <-'C:/Users/hp/Documents/FAO/data/OpenLandMap/'
 output_dir <-'C:/Users/luottoi/Documents/data/OpenLandMap/'
 
-# Area of interest
-AOI <- '01-Data/MKD.shp'
+# Area of interest: either own shapefile or 3-digit ISO code to extract from UN 2020 boundaries
+#AOI <- '01-Data/MKD.shp'
+AOI <- 'MKD'
 #Start and End time 
 start_T <- "2017-01-01"
 end_T <- "2017-12-31"
@@ -56,11 +57,14 @@ library(reticulate)
 
 setwd(wd)
 
-# Country shapefile
-AOI <- read_sf(AOI)
+# Upload own AOI shapefile ----
+#AOI <- read_sf(AOI)
 # convert AOI to a box polygon
 #AOI <- st_as_sfc(st_bbox(AOI))
 #AOI <- st_as_sf(AOI)
+
+
+
 
 #List of covariates to prepare
 # Mean annual temperature
@@ -83,14 +87,23 @@ AOI <- read_sf(AOI)
 
 # Multi-Scale Topographic Position Index
 
-
-#Initial setup and turn shp into gee geometry----
+#Initialize GEE ----
 ee_Initialize()
 
+#Initial setup either convert shp to gee geometry or extract from UN 2020 map----
 
-region <- sf_as_ee(AOI)
+#Convert shp to gee geometry
+#region <- sf_as_ee(AOI)
+#region = region$geometry()
+
+#Extract from UN 2020 map using ISO code ----
+region <-ee$FeatureCollection("projects/digital-soil-mapping-gsp-fao/assets/UN_BORDERS/BNDA_CTY")%>%
+  ee$FeatureCollection$filterMetadata('ISO3CD', 'equals', AOI)
+
+AOI_shp <-ee_as_sf(region)
+write_sf(AOI_shp, paste0('01-Data/',AOI,'.shp'))
+
 region = region$geometry()
-
 
 # Mean annual temperature (daytime) ----
 # Go to https://code.earthengine.google.com/
