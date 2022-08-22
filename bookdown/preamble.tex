@@ -10,7 +10,7 @@
   \thm@postskip=\thm@preskip
 
 }
-
+\usepackage{graphicx}
 \usepackage{afterpage}
 
 \newcommand\blankpage{%
@@ -35,13 +35,6 @@
 \definecolor{astral}{RGB}{153, 61, 15}
 \allsectionsfont{\sffamily\color{astral}}
 
-\hypersetup{
-    colorlinks=true,
-    linkcolor=astral,
-    filecolor=astral,
-    urlcolor=astral,
-    citecolor=astral
-}
 
 \usepackage{fancyhdr}
 \usepackage{pdfpages}
@@ -58,7 +51,7 @@
 \fancyhead[ER,OL]{\thepage}
 
 \usepackage{multicol}
-
+\usepackage{hyperref}
 \usepackage{longtable}
 \usepackage{array}
 \usepackage{multirow}
@@ -68,9 +61,13 @@
 \usepackage{pdflscape}
 \usepackage{tabu}
 \usepackage{threeparttable}
+\usepackage{adjustbox}
+\usepackage{rotating}
+\usepackage{tablefootnote}
 \usepackage[normalem]{ulem}
 % empty pages betwen chapters
 \usepackage{emptypage}
+
 
 \makeatletter
 \makeatother
@@ -96,3 +93,10 @@
 
 % no title page
 \AtBeginDocument{\let\maketitle\relax}
+\hypersetup{
+	colorlinks=true,
+	linkcolor=astral,
+	filecolor=astral,
+	urlcolor=astral,
+	citecolor=astral
+}

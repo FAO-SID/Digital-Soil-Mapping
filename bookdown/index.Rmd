@@ -1,5 +1,5 @@
 --- 
-title: "Country guidelines and specifications for Digital Soil Mapping"
+title: "Digital Soil Mapping Technical Manual"
 author: "GSP Secretariat and ITPS"
 date: ""
 #site: bookdown::bookdown_site
@@ -39,14 +39,17 @@ link-citations: yes
 classoption: oneside
 papersize: b5
 fontsize: 10pt
-description: "GSERmap Country Guidelines and Technical Specifications"
+description: "Digital Soil Mapping Technical Manual"
 always_allow_html: yes
+template: null
 ---
+
 
 ```{r set-options, echo=FALSE, cache=FALSE, warning=FALSE, message=FALSE, eval = FALSE}
 options(knitr.table.format = "latex")
 options(width = 60)
 
+library(kableExtra)
 # Cache results
 knitr::opts_chunk$set(cache=F,fig.pos = 'H',tidy.opts=list(width.cutoff=40),tidy=FALSE, size="tiny", fig.cap = T)
 
@@ -222,42 +225,13 @@ WoSIS
 
 *Prepared by:*\
 **Global Soil Partnership Secretariat**\
-Guillermo Federico Olmedo\
-Kostiantyn Viatkin\
-Isabel Luotto\
-Moritz Mainka\
-Yusuf Yigini\
 Ronald Vargas\
-Mario Guevara Santamaría\
+
 
 **Second Intergovernmental Technical Panel on Soils**\
 Luca Montanarella - European Commission, Joint Research Centre
-(*Chair*); Saéb AbdelHaleem Khresat - Jordan; Isaurinda Dos Santos
-Baptista Costa - Cape Verde; Sopon Chomchan -- Thailand; Juan Antonio
-Comerma - Venezuela; Talal Darwish - Lebanon; Gunay Erpul - Turkey;
-Fernando Garcia Préchac - Uruguay; Siosiua Halavatau - Tonga; Oneyda
-Hernandez Lara - Cuba; Rainer Horn - Germany; Amanullah Khan - Pakistan;
-Pavel Krasilnikov - Russia; Bhanooduth Lalljee - Mauritius; Botle
-Mapeshoane - Lesotho; Neil McKenzie - Australia; Maria de Lourdes
-Mendonca Santos -Brazil; Ahmad S. Muhaimeed - Iraq; Nsalambi V.
-Nkongolo - Democratic Republic of the Congo; Brajendra Parmar - India;
-Daniel John Pennock - Canada; Gary Pierzynski - USA; Peter de Ruiter -
-The Netherlands; Miguel Taboada - Argentina; Kazuyuki Yagi -- Japan;
-Martin Yemefack - Cameroon; Gan Lin Zhang -- China\
+(*Chair*); Saéb AbdelHaleem Khresat 
 
 **Third Intergovernmental Technical Panel on Soils**\
 Rosa Poch - Spain (*Chair*); Nsalambi V. Nkongolo - Democratic Republic
-of the Congo; Matshwene Edwin Moshia III - South Africa; Lydia Mumbi
-Chabala - Zambia; Générose Nziguhueba - Burundi; Edmond Hien - Burkina
-Faso; Ashok K. Patra - India; Jin Ke -- China; Chencho Norbu -- Bhutan;
-Jun Murase - Japan; Mohammad Jamal Khan - Pakistan; Costanza Calzolari -
-Italy; Ellen R. Graber - Israel; Peter de Ruiter - The Netherlands ;
-Alexey Sorokin - Russian Federation; Adalberto Benavides Mendoza -
-Mexico; Martha Marina Bolanos Benavides - Colombia; Fernando Garcia
-Préchac - Uruguay; Lucía Helena Cunha dos Anjos - Brazil; Samuel Francke
-Campana - Chile; Kutaiba M. Hassan - Iraq; Rafla Sahli Epse Attia -
-Tunisia; Saéb AbdelHaleem Khresat - Jordan; Gary Pierzynski - USA; David
-Allen Lobb - Canada; Siosiua Halavatau - Tonga; Megan Balks - New
-Zealand\
-
-
+of the Congo; 

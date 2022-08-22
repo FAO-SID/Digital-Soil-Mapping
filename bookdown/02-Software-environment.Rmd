@@ -74,7 +74,7 @@ The rgee package enables users to interact with the GEE servers using the R lang
 # Yanina Bellini Saibene
 
 #install.packages('remotes')
-remotes::install_github("r-spatial/rgee")
+# remotes::install_github("r-spatial/rgee")
 ```
 
 To be able to interact with the GEE via Python, it is necessary to install certain R packages but also the so-called "Miniconda" commmand prompt which acts as Python interpreter mediating between R and GEE. The 'ee_install()' function automatically downloads and install all the software that is needed.
@@ -82,14 +82,14 @@ To be able to interact with the GEE via Python, it is necessary to install certa
 ```{r}
 # load rgee package and install dependencies
 library(rgee)
-ee_install() # installs miniconda
+# ee_install() # installs miniconda
 ```
 
 Once the dependencies are installed, it is necessary to initialize rgee by providing the user credentials of our GEE account. The ee_Initialize command must be run every time we want to use rgee.
 
 ```{r}
 # Initialize Google Earth Engine! (you need to create a user account)
-ee_Initialize()
+# ee_Initialize()
 
 
 # Useful functions

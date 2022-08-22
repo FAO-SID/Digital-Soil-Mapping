@@ -35,14 +35,6 @@
   \KOMAoptions{parskip=half}}
 \makeatother
 \usepackage{xcolor}
-\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
-\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
-\hypersetup{
-  pdftitle={Country guidelines and specifications for Digital Soil Mapping},
-  pdfauthor={GSP Secretariat and ITPS},
-  hidelinks,
-  pdfcreator={LaTeX via pandoc}}
-\urlstyle{same} % disable monospaced font for URLs
 \usepackage{color}
 \usepackage{fancyvrb}
 \newcommand{\VerbBar}{|}
@@ -145,7 +137,7 @@
   \thm@postskip=\thm@preskip
 
 }
-
+\usepackage{graphicx}
 \usepackage{afterpage}
 
 \newcommand\blankpage{%
@@ -170,13 +162,6 @@
 \definecolor{astral}{RGB}{153, 61, 15}
 \allsectionsfont{\sffamily\color{astral}}
 
-\hypersetup{
-    colorlinks=true,
-    linkcolor=astral,
-    filecolor=astral,
-    urlcolor=astral,
-    citecolor=astral
-}
 
 \usepackage{fancyhdr}
 \usepackage{pdfpages}
@@ -193,7 +178,7 @@
 \fancyhead[ER,OL]{\thepage}
 
 \usepackage{multicol}
-
+\usepackage{hyperref}
 \usepackage{longtable}
 \usepackage{array}
 \usepackage{multirow}
@@ -203,9 +188,13 @@
 \usepackage{pdflscape}
 \usepackage{tabu}
 \usepackage{threeparttable}
+\usepackage{adjustbox}
+\usepackage{rotating}
+\usepackage{tablefootnote}
 \usepackage[normalem]{ulem}
 % empty pages betwen chapters
 \usepackage{emptypage}
+
 
 \makeatletter
 \makeatother
@@ -231,6 +220,13 @@
 
 % no title page
 \AtBeginDocument{\let\maketitle\relax}
+\hypersetup{
+	colorlinks=true,
+	linkcolor=astral,
+	filecolor=astral,
+	urlcolor=astral,
+	citecolor=astral
+}
 \AtBeginDocument{\renewcommand{\chaptername}{Chapter}}
 \usepackage{titling}
 \usepackage{natbib}
@@ -259,28 +255,19 @@
 \ifLuaTeX
   \usepackage{selnolig}  % disable illegal ligatures
 \fi
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same} % disable monospaced font for URLs
+\hypersetup{
+  pdftitle={Digital Soil Mapping Technical Manual},
+  pdfauthor={GSP Secretariat and ITPS},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
 
-\title{Country guidelines and specifications for Digital Soil Mapping}
+\title{Digital Soil Mapping Technical Manual}
 \author{GSP Secretariat and ITPS}
 \date{}
 
-\usepackage{amsthm}
-\newtheorem{theorem}{Theorem}[chapter]
-\newtheorem{lemma}{Lemma}[chapter]
-\newtheorem{corollary}{Corollary}[chapter]
-\newtheorem{proposition}{Proposition}[chapter]
-\newtheorem{conjecture}{Conjecture}[chapter]
-\theoremstyle{definition}
-\newtheorem{definition}{Definition}[chapter]
-\theoremstyle{definition}
-\newtheorem{example}{Example}[chapter]
-\theoremstyle{definition}
-\newtheorem{exercise}{Exercise}[chapter]
-\theoremstyle{definition}
-\newtheorem{hypothesis}{Hypothesis}[chapter]
-\theoremstyle{remark}
-\newtheorem*{remark}{Remark}
-\newtheorem*{solution}{Solution}
 \begin{document}
 \maketitle
 
@@ -399,166 +386,29 @@ World Soil Information Service
 
 \emph{Prepared by:}\\
 \textbf{Global Soil Partnership Secretariat}\\
-Guillermo Federico Olmedo\\
-Kostiantyn Viatkin\\
-Isabel Luotto\\
-Moritz Mainka\\
-Yusuf Yigini\\
 Ronald Vargas\\
-Mario Guevara Santamaría\\
 
 \textbf{Second Intergovernmental Technical Panel on Soils}\\
 Luca Montanarella - European Commission, Joint Research Centre
-(\emph{Chair}); Saéb AbdelHaleem Khresat - Jordan; Isaurinda Dos Santos
-Baptista Costa - Cape Verde; Sopon Chomchan -- Thailand; Juan Antonio
-Comerma - Venezuela; Talal Darwish - Lebanon; Gunay Erpul - Turkey;
-Fernando Garcia Préchac - Uruguay; Siosiua Halavatau - Tonga; Oneyda
-Hernandez Lara - Cuba; Rainer Horn - Germany; Amanullah Khan - Pakistan;
-Pavel Krasilnikov - Russia; Bhanooduth Lalljee - Mauritius; Botle
-Mapeshoane - Lesotho; Neil McKenzie - Australia; Maria de Lourdes
-Mendonca Santos -Brazil; Ahmad S. Muhaimeed - Iraq; Nsalambi V.
-Nkongolo - Democratic Republic of the Congo; Brajendra Parmar - India;
-Daniel John Pennock - Canada; Gary Pierzynski - USA; Peter de Ruiter -
-The Netherlands; Miguel Taboada - Argentina; Kazuyuki Yagi -- Japan;
-Martin Yemefack - Cameroon; Gan Lin Zhang -- China\\
+(\emph{Chair}); Saéb AbdelHaleem Khresat
 
 \textbf{Third Intergovernmental Technical Panel on Soils}\\
 Rosa Poch - Spain (\emph{Chair}); Nsalambi V. Nkongolo - Democratic Republic
-of the Congo; Matshwene Edwin Moshia III - South Africa; Lydia Mumbi
-Chabala - Zambia; Générose Nziguhueba - Burundi; Edmond Hien - Burkina
-Faso; Ashok K. Patra - India; Jin Ke -- China; Chencho Norbu -- Bhutan;
-Jun Murase - Japan; Mohammad Jamal Khan - Pakistan; Costanza Calzolari -
-Italy; Ellen R. Graber - Israel; Peter de Ruiter - The Netherlands ;
-Alexey Sorokin - Russian Federation; Adalberto Benavides Mendoza -
-Mexico; Martha Marina Bolanos Benavides - Colombia; Fernando Garcia
-Préchac - Uruguay; Lucía Helena Cunha dos Anjos - Brazil; Samuel Francke
-Campana - Chile; Kutaiba M. Hassan - Iraq; Rafla Sahli Epse Attia -
-Tunisia; Saéb AbdelHaleem Khresat - Jordan; Gary Pierzynski - USA; David
-Allen Lobb - Canada; Siosiua Halavatau - Tonga; Megan Balks - New
-Zealand\\
+of the Congo;
 
 \mainmatter
-\pagestyle{fancy}
-\setlength{\headheight}{20.39996pt}
 
-\hypertarget{background}{%
-\chapter{Background}\label{background}}
+\hypertarget{presentation}{%
+\chapter{Presentation}\label{presentation}}
 
-\hypertarget{the-importance-of-soil-organic-carbon}{%
-\section{The importance of soil organic carbon}\label{the-importance-of-soil-organic-carbon}}
-
-\hypertarget{objectives-of-soil-organic-carbon-mapping}{%
-\section{Objectives of soil organic carbon mapping}\label{objectives-of-soil-organic-carbon-mapping}}
-
-This is a citation (\protect\hyperlink{ref-xie2015}{Xie, 2015}).
-
-\hypertarget{data-policy}{%
-\section{Data policy}\label{data-policy}}
-
-\hypertarget{data-sharing-principles}{%
-\subsection{Data sharing principles}\label{data-sharing-principles}}
-
-The GSP Data Policy has been endorsed by partners of the Global Soil
-Partnership during the 5th GSP Plenary Assembly in June 2017
-(GSP \& FAO, 2017) in order to promote and govern soil data sharing for data
-products including GSOCmap contributions, and considering harmonization
-and interoperability requirements.\\
-The GSP data policy aims to ensure that:
-
-\begin{itemize}
-\item
-  every existing ownership right to shared soil data are respected;
-\item
-  the specific level of access and the conditions for data sharing are
-  clearly specified;
-\item
-  the ownership of each dataset and web service are properly
-  acknowledged and well-referenced; and
-\item
-  the data owners are protected from any liability arising from the
-  use of their original and/or derived data.
-\end{itemize}
-
-It is recommended that data owners comply with the following open data
-principles:
-
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\item
-  Accessibility: the data shall be divulged through the Internet (web
-  services).
-\item
-  Availability: the data is presented in a convenient,
-  platform-independent, and in line with standard formats (e.g.~web
-  feature service WFS).
-\item
-  License: the formal concession of the usage and access rights over
-  the data shared.
-\item
-  Cost: data shall be shared free of cost, or at no more than a
-  reasonable reproduction cost, preferably by downloading it from the
-  Internet.
-\item
-  Re-use and Redistribution: data must be provided and licensed under
-  terms that permit its reuse and redistribution, including
-  intermixing with other datasets.
-\item
-  Global benefit: any user must be able to access, use and
-  redistribute data of the Global Soil Information System. However,
-  inherited restrictions by national data policies shall be accepted.
-\item
-  Metadata: data describing the products of the Global Soil
-  Information System will by default be open for access.
-\end{enumerate}
-
-The data shared by the countries shall contain the relevant soil
-information representative for the area portrayed. The shared datasets
-contain the best available information for a given area and topic,
-however, they are subject to potential restrictions based on the
-institutions' or countries' data policy.\\
-The data shared by the countries should be quality controlled which
-means that the data have been technically evaluated to ensure data
-integrity, correctness, and completeness; errors and omissions are
-identified and, if possible, addressed.\\
-
-\hypertarget{ownership-data-rights-and-citation}{%
-\subsection{Ownership, data rights and citation}\label{ownership-data-rights-and-citation}}
-
-In the case of original data, the rightful data owner keeps full
-ownership of it. All intellectual property rights (IPR) and copyrights
-pertaining to the data owner remain intact and are respected by the soil
-data facility (SDF) host. All data providers must communicate to the SDI
-host their IPR and data use policies. Thus, the ownership of all data
-made available through the GSP soil portal need to be clearly specified.
-This is an important prerequisite to allow this data to be accessible
-through the soil SDF.\\
-In the case of derived data, the deriving institution becomes the
-rightful owner. However, all original data must be accredited and
-correctly cited. According to the Pillar 4 Implementation Plan, each
-global-level derived GSP data product will be quality-assured by the
-Pillar 4 Working Group. This includes agreements about the correct
-citation.\\
-The data owner shall ensure that the data shared can be used and
-interpreted by the authorized users in general; this includes providing
-the proper citations, as well as providing information over the
-ownership of such data for acknowledgement purposes. Users shall
-acknowledge the source of data provided through the Global Soil
-Information System.\\
-All providers of original data (data owners) are responsible to define
-and clarify the IPR and licensing. Any user of this data, such as the
-SDF host, has to respect the national data policies and/or licensing
-involved with the retrieval of the respective web services. In the case
-of data provided to the central repository, a bilateral
-agreement/license may be required (between the national data owner and
-SDF host), depending on and in conformity with national rules.\\
-More information about the data policy can be accessed at GSP \& FAO (2017).
+Soils provide ecosystem services critical to life on Earth. The Food and Agricultural Organization of the United Nations (FAO) recognizes the need to preserve soil resources from degradation and boost healthy soils. In 2012, FAO members established the Global Soil Partnership (GSP) as a mechanism to improve soil governance at global, regional and national levels\ldots{}
 
 \hypertarget{setting-up-the-software-environment}{%
 \chapter{Setting-up the software environment}\label{setting-up-the-software-environment}}
 
 \emph{Y. Yigini}
 
-This cookbook focuses on SOC modeling using open source digital mapping tools. The instructions in this chapter will guide user through installing and manually configuring the software to be used for DSM procedures for Microsoft Windows desktop platform. Instructions for the other platforms (e.g.~Linux Flavours, MacOS) can be found through free online resources.
+This cookbook focuses on SOC modeling using open source digital mapping tools. The instructions in this chapter will guide the user through installing and manually configuring the software to be used for DSM procedures for Microsoft Windows desktop platform. Instructions for other platforms (e.g.~Linux Flavours, MacOS) can be found through free online resources.
 
 \hypertarget{use-of-r-rstudio-and-r-packages}{%
 \section{Use of R, RStudio and R Packages}\label{use-of-r-rstudio-and-r-packages}}
@@ -574,7 +424,7 @@ Installation files and instructions can be downloaded from the Comprehensive R A
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  Go to the following link \url{https://cloud.r-project.org/index.html} to download and install \textbf{R}.
+  Go to the following link \url{https://cran.r-project.org/} to download and install \textbf{R}.
 \item
   Pick an installation file for your platform.
 \end{enumerate}
@@ -615,319 +465,309 @@ Beginners will find it very hard to start using \textbf{R} because it has no Gra
 
 When you download \textbf{R}, you get the basic \textbf{R} system which implements the \textbf{R} language. \textbf{R} becomes more useful with the large collection of packages that extend the basic functionality of it. \textbf{R} packages are developed by the \textbf{R} community.
 
+refer to:
+- tidyverse book (R for data science)
+- caret (cookbook)
+- \url{https://rspatial.org/}
+
 \hypertarget{finding-r-packages}{%
 \subsection{Finding R packages}\label{finding-r-packages}}
 
 The primary source for \textbf{R} packages is \href{https://cran.r-project.org/}{CRAN's} official website, where currently about 12,000 available packages are listed. For spatial applications, various packages are available. You can obtain information about the available packages directly on CRAN with the \texttt{available.packages()} function. The function returns a matrix of details corresponding to packages currently available at one or more repositories. An easier way to browse the list of packages is using the \href{https://cran.r-project.org/web/views/}{\emph{Task Views}} link, which groups together packages related to a given topic.
 
-\hypertarget{most-used-r-packages-for-digital-soil-mapping}{%
-\subsection{Most used R packages for digital soil mapping}\label{most-used-r-packages-for-digital-soil-mapping}}
-
-As was previously mentioned, \textbf{R} is extensible through packages. \textbf{R} packages are collections of \textbf{R} functions, data, documentation and compiled code easy to share with others. In the following Subsections, we are going to present the most used packages related to digital soil property mapping.
-
-\hypertarget{SoilPedometrics}{%
-\subsubsection{Soil science and pedometrics}\label{SoilPedometrics}}
-
-\href{https://CRAN.R-project.org/package=aqp}{\textbf{aqp}}: Algorithms for quantitative pedology. A collection of algorithms related to modeling of soil resources, soil classification, soil profile aggregation, and visualization.
-
-\href{https://CRAN.R-project.org/package=GSIF}{\textbf{GSIF}}: Global Soil Information Facility (GSIF). Tools, functions and sample datasets for digital soil mapping. GSIF tools (standards and functions) and sample datasets for global soil mapping.
-
-\href{http://ithir.r-forge.r-project.org/}{\textbf{ithir}}: A collection of functions and algorithms specific to pedometrics. The package was developed by Brendan Malone at the University of Sydney.
-
-\href{https://CRAN.R-project.org/package=soiltexture}{\textbf{soiltexture}}: The \href{https://cran.r-project.org/web/packages/soiltexture/vignettes/soiltexture_vignette.pdf}{\emph{Soil Texture Wizard}} is a set of \textbf{R} functions designed to produce texture triangles (also called texture plots, texture diagrams, texture ternary plots), classify and transform soil textures data. These functions virtually allow to plot any soil texture triangle (classification) into any triangle geometry (isosceles, right-angled triangles, etc.). The set of functions is expected to be useful to people using soil textures data from different soil texture classification or different particle size systems. Many (\textgreater{} 15) texture triangles from all around the world are predefined in the package. A simple text-based GUI is provided: \texttt{soiltexture\_gui()}.
-
-\hypertarget{spatial-analysis}{%
-\subsubsection{Spatial analysis}\label{spatial-analysis}}
-
-\href{https://CRAN.R-project.org/package=raster}{\textbf{raster}}: Reading, writing, manipulating, analyzing and modeling of gridded spatial data. The package implements basic and high-level functions, processing of very large files is supported.
-
-\href{https://CRAN.R-project.org/package=rgdal}{\textbf{rgdal}}: Provides bindings to Frank Warmerdam's Geospatial Data Abstraction Library (GDAL).
-
-\href{https://CRAN.R-project.org/package=RSAGA}{\textbf{RSAGA}}: The package provides access to geocomputing and terrain analysis functions of \href{/url\%7Bhttp://www.saga-gis.org/en/index.html\%7D}{SAGA GIS} from within \textbf{R} by running the command line version of System for Automated Geoscientific Analyses (SAGA).
-
-\href{https://cran.r-project.org/web/packages/sf/index.html}{\textbf{sf}}: The package provides an improvement on \textbf{sp} and \textbf{rgdal} for spatial datasets. It is using the newly Simple Feratures (SF) standard which is widely implemented in spatial databases (PostGIS, ESRI ArcGIS), and forms the vector data basis for libraries such as GDAL and web standards such as GeoJSON (\url{http://geojson.org/}).
-
-\href{https://CRAN.R-project.org/package=sp}{\textbf{sp}}: The package provides classes and methods for spatial data. The classes document where the spatial location information resides, for 2D or 3D data.
-
-\hypertarget{modelling}{%
-\subsubsection{Modelling}\label{modelling}}
-
-\href{https://CRAN.R-project.org/package=automap}{\textbf{automap}}: This package performs an automatic interpolation by automatically estimating the variogram and then calling \href{https://CRAN.R-project.org/package=gstat}{\textbf{gstat}}.
-
-\href{https://CRAN.R-project.org/package=caret}{\textbf{caret}}: Extensive range of functions for training and plotting classification and regression models.
-
-\href{https://CRAN.R-project.org/package=Cubist}{\textbf{Cubist}}: Regression modeling using rules with added instance-based corrections. Cubist models were developed by Ross Quinlan.
-
-\href{https://CRAN.R-project.org/package=C5.0}{\textbf{C5.0}}: C5.0 decision trees and rule-based models for pattern recognition. Another model structure developed by Ross Quinlan.
-
-\href{https://CRAN.R-project.org/package=gam}{\textbf{gam}}: Functions for fitting and working with generalized additive models.
-
-\href{https://CRAN.R-project.org/package=gstat}{\textbf{gstat}}: Variogram modeling with simple, ordinary and universal point or block (co)kriging, sequential Gaussian or indicator (co)simulation. The package includes variogram and variogram map plotting utility functions.
-
-\href{https://CRAN.R-project.org/package=nnet}{\textbf{nnet}}: Software for feed-forward neural networks with a single hidden layer, and for multinomial log-linear models.
-
-\hypertarget{mapping-and-plotting}{%
-\subsubsection{Mapping and plotting}\label{mapping-and-plotting}}
-
-Both \textbf{raster} and \textbf{sp} have handy functions for plotting spatial data. The following packages can be used as functional extentions.
-
-\href{https://cran.r-project.org/web/packages/ggplot2/index.html}{\textbf{ggplot2}}: Besides using the base plotting functionality, this is another useful plotting package.
-
-\href{https://CRAN.R-project.org/package=leaflet}{\textbf{leaflet}}: Create and customize interactive maps using the Leaflet JavaScript library and the \href{https://cran.r-project.org/web/packages/htmlwidgets/index.html}{\textbf{htmlwidgets}} package. These maps can be used directly from the \textbf{R} console, from \textbf{RStudio}, in \href{https://shiny.rstudio.com/}{\textbf{Shiny}} apps and \textbf{RMarkdown} documents.
-
-\href{https://CRAN.R-project.org/package=plotKML}{\textbf{plotKML}}: Writes sp-class, spacetime-class, raster-class and similar spatial and spatiotemporal objects to KML following some basic cartographic rules.
-
-\hypertarget{packages-used-in-this-cookbook}{%
-\subsection{Packages used in this cookbook}\label{packages-used-in-this-cookbook}}
-
-The authors of this cookbook used a number of different \textbf{R} packages. All required packages used in the cookbook can be installed using the following code and the \texttt{install.packages()} function when starting a new SOC mapping project. Alternatively, the code for the installation of the needed packages is included at the beginning of each Chapter.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{\# Install all required R packages used in the cookbook}
-\FunctionTok{install.packages}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\StringTok{"aqp"}\NormalTok{, }\StringTok{"automap"}\NormalTok{, }\StringTok{"car"}\NormalTok{, }\StringTok{"caret"}\NormalTok{, }\StringTok{"e1071"}\NormalTok{,}
-                   \StringTok{"GSIF"}\NormalTok{, }\StringTok{"htmlwidgets"}\NormalTok{, }\StringTok{"leaflet"}\NormalTok{, }\StringTok{"mapview"}\NormalTok{,}
-                   \StringTok{"Metrics"}\NormalTok{, }\StringTok{"openair"}\NormalTok{, }\StringTok{"plotKML"}\NormalTok{, }\StringTok{"psych"}\NormalTok{, }
-                   \StringTok{"quantregForest"}\NormalTok{, }\StringTok{"randomForest"}\NormalTok{, }\StringTok{"raster"}\NormalTok{,}
-                   \StringTok{"rasterVis"}\NormalTok{, }\StringTok{"reshape"}\NormalTok{, }\StringTok{"rgdal"}\NormalTok{, }\StringTok{"RSQLite"}\NormalTok{,}
-                   \StringTok{"snow"}\NormalTok{, }\StringTok{"soiltexture"}\NormalTok{, }\StringTok{"sf"}\NormalTok{, }\StringTok{"sp"}\NormalTok{))}
-\end{Highlighting}
-\end{Shaded}
-
-\hypertarget{r-and-spatial-data}{%
-\section{R and spatial data}\label{r-and-spatial-data}}
-
-\textbf{R} has a large and growing number of spatial data packages. We recommend taking a quick browse on \textbf{R}'s official website to see the spatial packages available: \url{http://cran.r-project.org/web/views/Spatial.html}.
-
-\hypertarget{reading-shapefiles}{%
-\subsection{Reading shapefiles}\label{reading-shapefiles}}
-
-The Environmental Systems Research Institute (ESRI) provides a shapefile format SHP which is widely used for storing vector-based spatial data (i.e., points, lines, polygons). This example demonstrates use of \textbf{raster} package that provides functions for reading and/or writing shapefiles.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{library}\NormalTok{(raster)}
-\CommentTok{\# Load the soil map from a shapefile *.shp file}
-\NormalTok{soilmap }\OtherTok{\textless{}{-}} \FunctionTok{shapefile}\NormalTok{(}\StringTok{"MK\_soilmap\_simple.shp"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-We may want to use these data in other GIS environments such as ArcGIS, QGIS, SAGA GIS, etc. This means we need to export the \texttt{SpatialPointsDataFrame} to an appropriate spatial data format such as a shapefile \texttt{*.shp}.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{\# For example, we can select the soil units classified as }
-\CommentTok{\# fluvisols according to WRB}
-\NormalTok{Fluvisols }\OtherTok{\textless{}{-}}\NormalTok{ soilmap[soilmap}\SpecialCharTok{$}\NormalTok{WRB }\SpecialCharTok{==} \StringTok{"Fluvisol"}\NormalTok{,]}
-
-\CommentTok{\# Save this as a new shapefile }
-\FunctionTok{shapefile}\NormalTok{(Fluvisols, }\AttributeTok{filename =} \StringTok{\textquotesingle{}results/fluvisols.shp\textquotesingle{}}\NormalTok{,}
-          \AttributeTok{overwrite =} \ConstantTok{TRUE}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\hypertarget{coordinate-reference-systems-in-r}{%
-\subsection{Coordinate reference systems in R}\label{coordinate-reference-systems-in-r}}
-
-We need to define the Coordinate Reference System (CRS) to be able to perform any sort of spatial analysis in \textbf{R}. To clearly tell \textbf{R} this information we define the CRS which describes a reference system in a way understood by the PROJ.4 projection library. Find more information at this link: \url{http://trac.osgeo.org/proj/}.
-
-An interface to the PROJ.4 library is available in the \textbf{rgdal} package. An alternative to using PROJ.4 character strings, we can use the corresponding yet simpler EPSG (European Petroleum Survey Group) code. \textbf{rgdal} also recognizes these codes. If you are unsure of the PROJ.4 or EPSG code for the spatial data that you have but know the CRS, you should consult \url{http://spatialreference.org/} for assistance.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{\# Print the CRS for the object soilmap}
-\NormalTok{soilmap}\SpecialCharTok{@}\NormalTok{proj4string}
-\end{Highlighting}
-\end{Shaded}
-
-The following example shows how a spatial object from a (comma-separated values) CSV file (\texttt{*.csv}) can be created. We can use the \texttt{coordinates()} function from the \textbf{sp} package to define which columns in the data frame refer to actual spatial coordinates. Here, the coordinates are listed in columns X and Y.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{\# Load the table with the soil observations site information}
-\NormalTok{dat\_sites }\OtherTok{\textless{}{-}} \FunctionTok{read.csv}\NormalTok{(}\AttributeTok{file =} \StringTok{"data/site{-}level.csv"}\NormalTok{)}
-
-\CommentTok{\# Convert from table to spatial points object}
-\FunctionTok{coordinates}\NormalTok{(dat\_sites) }\OtherTok{\textless{}{-}} \ErrorTok{\textasciitilde{}}\NormalTok{ X }\SpecialCharTok{+}\NormalTok{ Y}
-
-\CommentTok{\# Check the coordinate system}
-\NormalTok{dat\_sites}\SpecialCharTok{@}\NormalTok{proj4string}
-
-\CommentTok{\# As the CRS is not defined, we can assign the correct CRS as we}
-\CommentTok{\# have information about it. In this case, it should be EPSG:4326}
-\NormalTok{dat\_sites}\SpecialCharTok{@}\NormalTok{proj4string }\OtherTok{\textless{}{-}} \FunctionTok{CRS}\NormalTok{(}\StringTok{"+init=epsg:4326"}\NormalTok{)}
-
-\CommentTok{\# Check the CRS again}
-\NormalTok{dat\_sites}\SpecialCharTok{@}\NormalTok{proj4string}
-\end{Highlighting}
-\end{Shaded}
-
-\hypertarget{working-with-rasters}{%
-\subsection{Working with rasters}\label{working-with-rasters}}
-
-Most of the functions for handling raster data are available in the \textbf{raster} package. There are functions for reading and writing raster files from and to different formats. In DSM, we mostly work with data in table format and then rasterize this data so that we can produce a continuous map. For doing this in \textbf{R} environment, we will load raster data in a data frame. This data is a digital elevation model (DEM) provided by the International Soil Reference and Information Centre (ISRIC) for FYROM.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{\# For handling raster data, we load raster package}
-\FunctionTok{library}\NormalTok{(raster)}
-
-\CommentTok{\# Load DEM from the raster *.tif files}
-\NormalTok{DEM }\OtherTok{\textless{}{-}} \FunctionTok{raster}\NormalTok{(}\StringTok{"covs/DEMENV5.tif"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-We may want to export this raster to a suitable format to work in a standard GIS environment. See the help file for writing a raster \texttt{?writeRaster} to get information regarding the supported grid types that data can be exported into. Here, we will export our raster to ESRI ASCII (American Standard Code for Information Interchange), as it is a common and universal raster format.
-
-We may also want to export our DEM to KML (Keyhole Markup Language) file (\texttt{*.kml}) using the \texttt{KML()} function. \texttt{KML()} is a handy function from the \textbf{raster} package for exporting grids to KML format. Note that we need to re-project the data to the World Geodetic System (WGS) WGS84 geographic. The raster re-projection is performed using the \texttt{projectRaster()} function. Look at the help file \texttt{?projectRaster} for more information.
-
-\hypertarget{other-dsm-software-and-tools}{%
-\section{Other DSM software and tools}\label{other-dsm-software-and-tools}}
+\hypertarget{gee---google-earth-engine}{%
+\section{GEE - google earth engine}\label{gee---google-earth-engine}}
 
 \begin{itemize}
 \tightlist
 \item
-  \textbf{GRASS GIS}: Available at \url{https://grass.osgeo.org/} (free and open source).
-\item
-  \textbf{SAGA GIS}: Available at \url{https://sourceforge.net/projects/saga-gis/files/} (free and open source).
-\item
-  \textbf{QGIS}: Available at \url{http://www.qgis.org/en/site/forusers/download.html} (free and open source).
+  general info
 \end{itemize}
 
-\hypertarget{product-specifications}{%
-\chapter{Product specifications}\label{product-specifications}}
+\begin{figure}
+\includegraphics[width=12cm]{images/2.1_GEE_codeeditor} \caption{Google Earth Engine code editor.}\label{fig:unnamed-chunk-1}
+\end{figure}
 
-\hypertarget{generic-target-specification}{%
-\section{Generic target specification}\label{generic-target-specification}}
+\begin{itemize}
+\tightlist
+\item
+  upload assets to GEE
+\end{itemize}
 
-\hypertarget{metadata-specifications}{%
-\section{Metadata specifications}\label{metadata-specifications}}
+\begin{figure}
+\includegraphics[width=12cm]{images/2.2_upload-assets-1} \caption{Select files and filetype to be uploaded as GEE assets.}\label{fig:unnamed-chunk-2}
+\end{figure}
 
-\hypertarget{data-collection-and-processing}{%
-\chapter{Data collection and processing}\label{data-collection-and-processing}}
+\begin{figure}
+\includegraphics[width=12cm]{images/2.2_upload-assets-2} \caption{Upload interface.}\label{fig:unnamed-chunk-3}
+\end{figure}
 
-\hypertarget{different-scenarios-of-country-driven-action}{%
-\section{Different scenarios of country driven action}\label{different-scenarios-of-country-driven-action}}
+\begin{itemize}
+\tightlist
+\item
+  Explain how to import uploaded assets (?) \ldots{}
+\end{itemize}
 
-\hypertarget{delivery-of-the-maps-produced-by-the-countries}{%
-\subsection{Delivery of the maps produced by the countries}\label{delivery-of-the-maps-produced-by-the-countries}}
+\hypertarget{rgee---extension-to-use-google-earth-engine-in-r}{%
+\section{rgee - Extension to use google earth engine in R}\label{rgee---extension-to-use-google-earth-engine-in-r}}
 
-\hypertarget{data-submission-form}{%
-\subsubsection{Data submission form}\label{data-submission-form}}
+The rgee package enables users to interact with the GEE servers using the R language. The package makes use of the Python language to interact with GEE. The package can be downloaded easily either directly from the GitHub repository or via CRAN.
 
-\hypertarget{joint-efforts}{%
-\subsection{Joint efforts}\label{joint-efforts}}
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Source: https://yabellini.github.io/curso\_rgee/index.html}
+\CommentTok{\# Yanina Bellini Saibene}
 
-\hypertarget{gsp-gapfilling}{%
-\subsection{GSP gapfilling}\label{gsp-gapfilling}}
+\CommentTok{\#install.packages(\textquotesingle{}remotes\textquotesingle{})}
+\CommentTok{\# remotes::install\_github("r{-}spatial/rgee")}
+\end{Highlighting}
+\end{Shaded}
 
-\hypertarget{spatial-modeling-using-publicly-available-data}{%
-\subsubsection{Spatial modeling using publicly available data}\label{spatial-modeling-using-publicly-available-data}}
+To be able to interact with the GEE via Python, it is necessary to install certain R packages but also the so-called ``Miniconda'' commmand prompt which acts as Python interpreter mediating between R and GEE. The `ee\_install()' function automatically downloads and install all the software that is needed.
 
-\hypertarget{using-publicly-available-soc-stock-maps}{%
-\subsubsection{Using publicly available SOC stock maps}\label{using-publicly-available-soc-stock-maps}}
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# load rgee package and install dependencies}
+\FunctionTok{library}\NormalTok{(rgee)}
+\CommentTok{\# ee\_install() \# installs miniconda}
+\end{Highlighting}
+\end{Shaded}
 
-\hypertarget{data-processing-and-compilation-of-the-gsocmap}{%
-\section{Data processing and compilation of the GSOCmap}\label{data-processing-and-compilation-of-the-gsocmap}}
+Once the dependencies are installed, it is necessary to initialize rgee by providing the user credentials of our GEE account. The ee\_Initialize command must be run every time we want to use rgee.
 
-\hypertarget{blocks}{%
-\chapter{Blocks}\label{blocks}}
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Initialize Google Earth Engine! (you need to create a user account)}
+\CommentTok{\# ee\_Initialize()}
 
-\hypertarget{equations}{%
-\section{Equations}\label{equations}}
 
-Here is an equation.
+\CommentTok{\# Useful functions}
 
-\begin{equation} 
-  f\left(k\right) = \binom{n}{k} p^k\left(1-p\right)^{n-k}
-  \label{eq:binom}
-\end{equation}
+\CommentTok{\#ee\_check() \# check the dependencies that do not belong to R}
+\CommentTok{\#ee\_clean\_credentials() \# to remove the user credentials}
+\CommentTok{\#ee\_clean\_pyenv() \# Delete variables of the system}
+\end{Highlighting}
+\end{Shaded}
 
-You may refer to using \texttt{\textbackslash{}@ref(eq:binom)}, like see Equation \eqref{eq:binom}.
+\hypertarget{introduction-to-digital-soil-mapping}{%
+\chapter{Introduction to Digital Soil Mapping}\label{introduction-to-digital-soil-mapping}}
 
-\hypertarget{theorems-and-proofs}{%
-\section{Theorems and proofs}\label{theorems-and-proofs}}
-
-Labeled theorems can be referenced in text using \texttt{\textbackslash{}@ref(thm:tri)}, for example, check out this smart theorem \ref{thm:tri}.
-
-\begin{theorem}
-\protect\hypertarget{thm:tri}{}\label{thm:tri}For a right triangle, if \(c\) denotes the \emph{length} of the hypotenuse
-and \(a\) and \(b\) denote the lengths of the \textbf{other} two sides, we have
-\[a^2 + b^2 = c^2\]
-\end{theorem}
-
-Read more here \url{https://bookdown.org/yihui/bookdown/markdown-extensions-by-bookdown.html}.
-
-\hypertarget{callout-blocks}{%
-\section{Callout blocks}\label{callout-blocks}}
-
-The R Markdown Cookbook provides more help on how to use custom blocks to design your own callouts: \url{https://bookdown.org/yihui/rmarkdown-cookbook/custom-blocks.html}
-
-\hypertarget{blocks-1}{%
-\chapter{Blocks}\label{blocks-1}}
-
-\hypertarget{equations-1}{%
-\section{Equations}\label{equations-1}}
-
-Here is an equation.
+Digital soil mapping (DSM) is a methodological framework to create soil attribute maps on the basis of the quantitative relationships between spatial soil databases and environmental covariates. The quantitative relations can be modelled by different statistical approaches, most of them considered machine learning techniques. Environmental covariates are spatially explicit proxies of soil-forming factors that are employed as predictors of the geographical distribution of soil properties. The methodology has evolved from the theories of soil genesis developed by Vasil Dokuchaev in his work the Russian Chernozems (1883), which later were formalised by Jenny (1941) with the equation of the soil-forming factors. The conceptual equation of soil-forming factors has been updated by McBratney, Santos and Minasny (\protect\hyperlink{ref-McBratney2003}{2003}) as follow:
 
 \begin{equation} 
-  f\left(k\right) = \binom{n}{k} p^k\left(1-p\right)^{n-k}
-  \label{eq:binom}
+  S = f\left(s,c,o,r,p,a,n\right)
+  \label{eq:scorpan}
 \end{equation}
 
-You may refer to using \texttt{\textbackslash{}@ref(eq:binom)}, like see Equation \eqref{eq:binom}.
+Where \(S\) is the soil classes or attributes (to be modelled) as a function of ``\(s\)'' as other soil properties, ``\(c\)'' as climatic properties, ``\(o\)'' as organisms, including land cover and human activity, ``\(r\)'' as terrain attributes, ``\(p\)'' as parent material, ``\(a\)'' as soil age, and ``\(n\)'' as the geographic position.
 
-\hypertarget{theorems-and-proofs-1}{%
-\section{Theorems and proofs}\label{theorems-and-proofs-1}}
+Digital soil mapping has been used to produce maps of soil nutrients. For instance, Hengl \emph{et al.} (\protect\hyperlink{ref-Hengl2017}{2017}) predicted 15 soil nutrients at a 250 m resolution in Africa, using a random forest model (Wright and Ziegler, 2016), topsoil nutrient observations at point locations and a set of spatially-explicit environmental covariates. In 2021, Hengl et al.~applied the same modelling approach to estimate total phosphorus in semi-natural soils at the global scale, as well.
 
-Labeled theorems can be referenced in text using \texttt{\textbackslash{}@ref(thm:tri)}, for example, check out this smart theorem \ref{thm:tri}.
+In this technical manual, we present a DSM frameworks to map soil properties, including soil nutrients. One approach for soil observations with latitude and longitude data (point-support) (Figure \ref{fig:workflow1}).
 
-\begin{theorem}
-\protect\hypertarget{thm:tri}{}\label{thm:tri}For a right triangle, if \(c\) denotes the \emph{length} of the hypotenuse
-and \(a\) and \(b\) denote the lengths of the \textbf{other} two sides, we have
-\[a^2 + b^2 = c^2\]
-\end{theorem}
+\begin{figure}
+  \centering
+  \includegraphics[width=0.9\textwidth]{images/workflow lat-long data.pdf}
+  \caption{Digital soil mapping approach for point-support data. Circles are the steps.}
+  \label{fig:workflow1}
+\end{figure}
 
-Read more here \url{https://bookdown.org/yihui/bookdown/markdown-extensions-by-bookdown.html}.
+\hypertarget{step-1-soil-data-preparation}{%
+\chapter{Step 1: soil data preparation}\label{step-1-soil-data-preparation}}
 
-\hypertarget{callout-blocks-1}{%
-\section{Callout blocks}\label{callout-blocks-1}}
+Soil data consist of measurement at a specific geographical location, time and soil depth. Therefore, it is necessary to arrange the data following the format shown in Table \ref{tab:data1}.
 
-The R Markdown Cookbook provides more help on how to use custom blocks to design your own callouts: \url{https://bookdown.org/yihui/rmarkdown-cookbook/custom-blocks.html}
+\begin{table}[htbp]
+    \caption{Format example of a soil dataset}
+    \scalebox{0.685}{
+    \begin{threeparttable}
+        \centering
+            \begin{tabular}{rrrrrrrrrl}
+            \toprule
+            Profile ID & Horizon ID & Lat & Long & Year & Top  & Bottom  & Soil property & Value & Lab method\\
+            \midrule
+            1 & 1\_1 & 12.123456 & 1.123456 & 2018 & 0  & 20 & SOC & 3.4 & W\&B \\
+            1 & 1\_2 & 12.123456 & 1.123456 & 2018 & 20 & 40 & SOC & 2.1 & W\&B \\
+            2 & 2\_1 & 23.123456 & 2.123456 & 2019 & 0  & 30 & SOC & 2.9 & W\&B\\
+            \bottomrule
+        \end{tabular}
+        \begin{tablenotes}
+        \item \footnotesize Profile ID = unique profile identifier; Horizon ID = unique layer identifier; Lat = latitude in decimal degrees; Long = longitude in decimal degrees; Year = sampling year; Top = upper limit of the layer in cm; Bottom = lower limit of the layer in cm; Soil property = name of the soil property; Value = numerical value of the measure; Lab method = name of the laboratory protocol used for measuring the soil property.
+        \end{tablenotes}
+    \end{threeparttable}
+    \label{tab:data1}
+    }
+\end{table}
 
-\hypertarget{blocks-2}{%
-\chapter{Blocks}\label{blocks-2}}
+Soil data usually require a preprocessing step to solve common issues such as, arranging the data format, fixing soil horizon depth consistency, detecting unusual soil property measurements, among others issues.
+Once the original dataset is clean and consistent, data harmonisation is needed to produce synthetic horizons (such as 0-30 cm layer), as well as to make compatible measurements from different lab methods. Horizon harmonisation will be done with the mass preserving spline function (\protect\hyperlink{ref-Bishop1999}{Bishop, McBratney and Laslett, 1999}; \protect\hyperlink{ref-Malone2009}{Malone \emph{et al.}, 2009}) fitted to each individual soil profile, which requires more than a layer per profile. In the cases of single-layer samples, which is common in sampling for nutrient determination, a pedotransfer function locally calibrated should be applied. Pedotransfer functions will be also required to harmonise the laboratory methods. Experts from GLOSOLAN will provide advice in this regard.
 
-\hypertarget{equations-2}{%
-\section{Equations}\label{equations-2}}
+\hypertarget{step-2-environmental-covariates}{%
+\chapter{Step 2: environmental covariates}\label{step-2-environmental-covariates}}
 
-Here is an equation.
+\hypertarget{environmental-covariates}{%
+\section{Environmental covariates}\label{environmental-covariates}}
 
-\begin{equation} 
-  f\left(k\right) = \binom{n}{k} p^k\left(1-p\right)^{n-k}
-  \label{eq:binom}
-\end{equation}
+The SCORPAN equation (Eq. \ref{eq:scorpan}) refers to the soil-forming factors that determine the spatial variation of soils. However, these factors cannot be measured directly. Instead, proxies of these soil forming factors are used. One essential characteristic of the environmental covariates is that they are spatially explicit, covering the whole study area. Table 2 shows a summary of the environmental covariates that can be implemented under the DSM framework.
 
-You may refer to using \texttt{\textbackslash{}@ref(eq:binom)}, like see Equation \eqref{eq:binom}.
+\begin{longtable}{p{0.12\textwidth}  p{0.47\textwidth} p{0.20\textwidth} p{0.10\textwidth}}
 
-\hypertarget{theorems-and-proofs-2}{%
-\section{Theorems and proofs}\label{theorems-and-proofs-2}}
+        \caption{Environmental covariates}\\ 
+        \hline
+        Factor & Description & Code & Resolution \endfirsthead 
+        \hline
+        Temp-erature & Mean air temperature (annual) & bio1 & 1000 \\
+        & Mean daily temperature of warmest month & bio5 & 1000 \\
+        & Mean daily temperature of coldest month & bio6 & 1000 \\ 
+        \hline
+        Precipi-tation & Total precipitation (annual) & bio12 & 1000 \\
+        & Mean precipitation of wettest month & bio13 & 1000 \\
+        & Mean precipitation of driest month & bio14 & 1000 \\
+        & Mean monthly precipitation of wettest quarter & bio16 & 1000 \\
+        & Mean monthly precipitation of driest quarter & bio17 & 1000 \\ 
+        \hline
+        Evapotransp-iration & Mean monthly PET & pet\_penman\_mean & 1000 \\
+        & Minimum monthly PET & pet\_penman\_min & 1000 \\
+        & Range monthly PET & pet\_penman\_range & 1000 \\
+        & Maximum monthly PET & pet\_penman\_max & 1000 \\ 
+        \hline
+        Wind & Minimum monthly wind speed & sfcWind\_min & 1000 \\
+        & Maximum monthly wind speed & sfcWind\_max & 1000 \\
+        & Range monthly wind speed & sfcWind\_range & 1000 \\ 
+        \hline
+        Growing season & Number of days with mean daily air temperature  10 °C & ngd10 & 1000 \\ 
+        \hline
+        Vegetation Indices & NDVI (MOD13Q1), mean March-May from 2000-2022 & ndvi\_030405\_mean & 250 \\
+        & NDVI (MOD13Q1), mean June-August from 2000-2022 & ndvi\_060708\_mean & 250 \\
+        & NDVI (MOD13Q1), mean September-November from 2000-2022 & ndvi\_091011\_mean & 250 \\
+        & NDVI (MOD13Q1), mean December-February from 2000-2022 & ndvi\_120102\_mean & 250 \\
+        & NDVI (MOD13Q1), standard deviation March-May from 2000-2022 & ndvi\_030405\_sd & 250 \\
+        & NDVI (MOD13Q1), standard deviation June-August from 2000-2022 & ndvi\_060708\_sd & 250 \\
+        & NDVI (MOD13Q1), standard deviation September-November from 2000-2022 & ndvi\_091011\_sd & 250 \\
+        & NDVI (MOD13Q1), standard deviation December-February from 2000-2022 & ndvi\_120102\_sd & 250 \\ 
+        \hline
+        FPAR & Fraction of photosynthetically active radiation (FPAR) (MOD15A2H), mean March-May from 2000-2022 & fpar\_030405\_mean & 500 \\
+        & Fraction of photosynthetically active radiation (FPAR) (MOD15A2H), mean June-August from 2000-2022 & fpar\_060708\_mean & 500 \\
+        & Fraction of photosynthetically active radiation (FPAR) (MOD15A2H), mean September-November from 2000-2022 & fpar\_091011\_mean & 500 \\
+        & Fraction of photosynthetically active radiation (FPAR) (MOD15A2H), mean December-February from 2000-2022 & fpar\_120102\_mean & 500 \\
+        & Fraction of photosynthetically active radiation (FPAR) (MOD15A2H), standard deviation March-May from 2000-2022 & fpar\_030405\_sd & 500 \\
+        & Fraction of photosynthetically active radiation (FPAR) (MOD15A2H), standard deviation June-August from 2000-2022 & fpar\_060708\_sd & 500 \\
+        & Fraction of photosynthetically active radiation (FPAR) (MOD15A2H), standard deviation September-November from 2000-2022 & fpar\_091011\_sd & 500 \\
+        & Fraction of photosynthetically active radiation (FPAR) (MOD15A2H), standard deviation December-February from 2000-2022 & fpar\_120102\_sd & 500 \\ 
+        \hline
+        LST & Land Surface Temperature Day (MOD11A2), mean March-May from 2000-2022 & lstd\_030405\_mean & 1000 \\
+        & Land Surface Temperature Day (MOD11A2), mean June-August from 2000-2022 & lstd\_060708\_mean & 1000 \\
+        & Land Surface Temperature Day (MOD11A2), mean September-November from 2000-2022 & lstd\_091011\_mean & 1000 \\
+        & Land Surface Temperature Day (MOD11A2), mean December-February from 2000-2022 & lstd\_120102\_mean & 1000 \\
+        & Land Surface Temperature Day (MOD11A2), standard deviation March-May from 2000-2022 & lstd\_030405\_sd & 1000 \\
+        & Land Surface Temperature Day (MOD11A2), standard deviation June-August from 2000-2022 & lstd\_060708\_sd & 1000 \\
+        & Land Surface Temperature Day (MOD11A2), standard deviation September-November from 2000-2022 & lstd\_091011\_sd & 1000 \\
+        & Land Surface Temperature Day (MOD11A2), standard deviation December-February from 2000-2022 & lstd\_120102\_sd & 1000 \\ 
+        \hline
+        NDLST & Normalised Difference between LST Day and LST Night (MOD11A2), mean March-May from 2000-2022 & ndlst\_030405\_mean & 1000 \\
+        & Normalised Difference between LST Day and LST Night (MOD11A2), mean June-August from 2000-2022 & ndlst\_060708\_mean & 1000 \\
+        & Normalised Difference between LST Day and LST Night (MOD11A2), mean September-November from 2000-2022 & ndlst\_091011\_mean & 1000 \\
+        & Normalised Difference between LST Day and LST Night (MOD11A2), mean December-February from 2000-2022 & ndlst\_120102\_mean & 1000 \\
+        & Normalised Difference between LST Day and LST Night (MOD11A2), standard deviation March-May from 2000-2022 & ndlst\_030405\_sd & 1000 \\
+        & Normalised Difference between LST Day and LST Night (MOD11A2), standard deviation June-August from 2000-2022 & ndlst\_060708\_sd & 1000 \\
+        & Normalised Difference between LST Day and LST Night (MOD11A2), standard deviation September-November from 2000-2022 & ndlst\_091011\_sd & 1000 \\
+        & Normalised Difference between LST Day and LST Night (MOD11A2), standard deviation December-February from 2000-2022 & ndlst\_120102\_sd & 1000 \\ 
+        \hline
+        SWIR & Black-sky albedo for shortwave broadband (MCD43A3), mean June-August from 2000-2022 & swir\_060708\_mean & 500 \\ 
+        \hline
+        Snow cover & MODIS Snow Cover (MOD10A1) mean & snow\_cover & 500 \\ 
+        \hline
+        Land cover & Dynamic World 10m near-real-time (NRT) Land Use/Land Cover (LULC) dataset. Mean estimated probability of complete coverage by trees & trees & 250 \\
+        & Dynamic World 10m near-real-time (NRT) Land Use/Land Cover (LULC) dataset. Mean estimated probability ofcomplete coverage by shrub and scrub & shrub\_and\_scrub & 250 \\
+        & Dynamic World 10m near-real-time (NRT) Land Use/Land Cover (LULC) dataset. Mean estimated probability of complete coverage by flooded vegetation & flooded\_vegetation & 250 \\
+        & Dynamic World 10m near-real-time (NRT) Land Use/Land Cover (LULC) dataset. Mean estimated probability of complete coverage by grass & grass & 250 \\
+        & Dynamic World 10m near-real-time (NRT) Land Use/Land Cover (LULC) dataset. Mean estimated probability of complete coverage by bare & crop & 250 \\ 
+        \hline
+        Terrain & Profile curvature & curvature & 250 \\
+        & Downslope curvature & downslopecurvature & 250 \\
+        & Uplslope curvature & upslopecurvature & 250 \\
+        & Deviation from Mean Value & dvm & 250 \\
+        & Deviation from Mean Value & dvm2 & 250 \\
+        & Elevation & elevation & 250 \\
+        & Melton Ruggedness Number & mrn & 250 \\
+        & Negative openness & neg-openness & 250 \\
+        & Possitive openness & por-openness & 250 \\
+        & Slope & slope & 250 \\
+        & Topographic position index & tpi & 250 \\
+        & Terrain wetness index & twi & 250 \\
+        & Multirresolution of valley bottom flatness & vbf & 250 \\
+        \hline
+\label{tab:covs}
+\end{longtable}
 
-Labeled theorems can be referenced in text using \texttt{\textbackslash{}@ref(thm:tri)}, for example, check out this smart theorem \ref{thm:tri}.
+Apart from the environmental covariates mentioned in Table \ref{tab:covs}, other types of maps could also be included, such as Global Surface Water Mapping Layers and Water Soil Erosion from the Joint Research Centre (JRC). At national level there may be very significant covariates that could complement or replace the covariates of Table \ref{tab:covs}.
 
-\begin{theorem}
-\protect\hypertarget{thm:tri}{}\label{thm:tri}For a right triangle, if \(c\) denotes the \emph{length} of the hypotenuse
-and \(a\) and \(b\) denote the lengths of the \textbf{other} two sides, we have
-\[a^2 + b^2 = c^2\]
-\end{theorem}
+Since environmental covariates are available at different resolutions and coordinate reference systems (CRS), they have to be harmonised at a common resolution and CRS. The target resolution in GSNmap is 250 m x 250 m, therefore, all covariates were aggregated (from higher to lower resolution) or disaggregated (from lower to higher resolution) to 250 m. This process involved a raster resampling method, which is usually implemented by a bilinear approach for continuous covariates, and by the nearest-neighbour approach for categorical covariates (not included in the current list).
 
-Read more here \url{https://bookdown.org/yihui/bookdown/markdown-extensions-by-bookdown.html}.
+Note that the target resolution of GSNmap has been set at 250 m, which can be considered a moderate resolution for a global layer. However, those countries that require a higher resolution are free to develop higher resolution maps and aggregate the resulting maps to the target resolution of GSNmap for submission.
 
-\hypertarget{callout-blocks-2}{%
-\section{Callout blocks}\label{callout-blocks-2}}
+\hypertarget{reducing-collinearity-in-environmental-covariates}{%
+\section{Reducing collinearity in environmental covariates}\label{reducing-collinearity-in-environmental-covariates}}
 
-The R Markdown Cookbook provides more help on how to use custom blocks to design your own callouts: \url{https://bookdown.org/yihui/rmarkdown-cookbook/custom-blocks.html}
+Multicollinearity is usually present in remote sensing data and terrain attributes. While this was an issue for multiple linear regression models, current models such as random forest can deal with high dimensionality. However, the main reasons to reduce the number of environmental covariates are that a model with fewer predictors can be interpreted more easily, thus extracting new knowledge, redundant information increasing the computational demand, and improve prediction results (\protect\hyperlink{ref-Behrens2014}{Behrens \emph{et al.}, 2014}).
+
+Covariate selection can be done by supervised or unsupervised methods (\protect\hyperlink{ref-Behrens2010}{Behrens \emph{et al.}, 2010}). Supervised methods work on the basis of prediction results, hence they are based on a given dataset. For instance, recursive feature elimination (RFE) in caret R package (\protect\hyperlink{ref-Kuhn2022}{Kuhn, 2022}) provides a tool for selecting covariates according to their predicting contribution. Instead, unsupervised methods are used to reduce the dimensionality of the dataset by removing redundant information without taking into account a particular target variable. Principal component analysis is one of the most widely used for this purpose, however, it does not ensure that specific discriminant features are kept within the main factors (\protect\hyperlink{ref-Behrens2014}{Behrens \emph{et al.}, 2014}). Another drawback of this technique is that model interpretation can be reduced when using factors instead of the original covariates.
+
+\hypertarget{merging-soil-data-and-environmental-covariates}{%
+\section{Merging soil data and environmental covariates}\label{merging-soil-data-and-environmental-covariates}}
+
+A calibration dataset consists of soil observations and a matrix of predictors, where each row is a soil observation paired with the values of the corresponding covariates for the given spatial location. Some common issues and solution when merging soil observations and covariates are:
+
+\begin{itemize}
+\tightlist
+\item
+  Mismatch of coordinate reference system (CRS): it requires to convert the CRS of point data to the raster or polygon covariate CRS.
+\item
+  Categorical covariates: some covariates may be categorical, such as land use/cover, legacy soil maps or geological maps. A common problem in this case is that some classes may not be sampled with any soil observation, causing an error when using the layer for prediction, since the model cannot predict over a class that was not part of the model calibration step. Also, because of the cross-validation procedure, it is advised to have, at least, three soil samples per class for the same reason.
+\end{itemize}
+
+\hypertarget{step-3-mapping-continuous-soil-properties}{%
+\chapter{Step 3: Mapping continuous soil properties}\label{step-3-mapping-continuous-soil-properties}}
+
+\hypertarget{setting-up-repeated-k-fold-cross-validation}{%
+\section{Setting up repeated k-fold cross validation}\label{setting-up-repeated-k-fold-cross-validation}}
+
+Cross validation is one of the most used methods in DSM for assessing the overall accuracy of the resulting maps (Step 8, Figure 3). Since this is implemented along with the model calibration step, we explain the process at this stage.
+
+Cross validation consists of randomly splitting the input data into a training set and a testing set. However, a unique testing dataset can bias the overall accuracy. Therefore, k-fold cross validation randomly splits the data into k parts, using 1/k part of it for testing and k-1/k part for training the model. In order to make the final model more robust in terms of parameter estimations, we include repetitions of this process. The final approach is called repeated k-fold cross-validation, where k will be equal to ten in this process. A graphical representation of the 10-fold cross validation is shown in Figure \ref{fig:cv}. Note that green balls represent the samples belonging to the testing set and yellow balls are samples of the training set. Each row is a splitting step of the 10-folds, while each block (repetitions) represent the repetition step.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.9\textwidth]{images/cv.pdf}
+  \caption{Schematic representation of the repeated cross-validation process.}
+  \label{fig:cv}
+\end{figure}
+
+Step 5 in Figure 3 represents the repeated cross-validation, but note that after each single splitting step (the rows in Figure 4) the training data go to model calibration, which will be explained in Step 6 (next Section), and the testing data will be used with the calibrated model to produce the residuals (Step 8, Section 2.2.8).
+Repeated cross validation has been nicely implemented in the caret R package (\protect\hyperlink{ref-Kuhn2022}{Kuhn, 2022}), along with several calibration methods.
+
+\hypertarget{model-calibration}{%
+\section{Model calibration}\label{model-calibration}}
+
+The model calibration step involves the use of a statistical model to find the relations between soil observations and environmental covariates. One of the most widely used models in DSM is random forest (\protect\hyperlink{ref-Breiman2001}{Breiman, 2001}). Random forest is considered a machine learning method which belongs to the decision-tree type of model. Random forest creates an ensemble of trees using a random selection of covariate. The prediction of a single tree is made based on the observed samples mean in the leaf. The random forest prediction is made by taking the average of the predictions of the single trees. The size of the number of covariates at each tree (mtry) can be fine-tuned before calibrating the model.
+
+Quantile regression forests (QRF, Meinshausen (\protect\hyperlink{ref-Meinshausen2006}{2006})) are a generalisation of the random forest models, capable of not only predicting the conditional mean, but also the conditional probability density function. This feature allows one to estimate the standard deviation of the prediction, as well as the likelihood of the target variable falling below a given threshold. In a context where a minimum level of a soil nutrient concentration may be decisive for improving the crop yield, this feature can play an important role for the GSNmap initiative.
+
+Model calibration will be implemented using the caret package (\protect\hyperlink{ref-Kuhn2022}{Kuhn, 2022}). While we suggest to use QRF, caret provides a large set of models \url{https://topepo.github.io/caret/available-} models.html\#) that might perform better in specific cases. In this regard, it is up to the user to implement a different model, ensuring the product specifications (Section Product Specifications).
+
+\hypertarget{predicting-soil-attributes}{%
+\section{Predicting soil attributes}\label{predicting-soil-attributes}}
+
+After calibrating the model, caret will select the best set of parameters and will fit the model using the whole dataset. Then, the final model can be used to predict the target soil properties. The process uses the model and the values of the covariates at target locations. This is generally done by using the same input covariates as a multilayer raster format, ensuring that the names of the layers are the same as the covariates in the calibration dataset. In this step we will predict the conditional mean and conditional standard deviation at each raster cell.
+
+\hypertarget{step-4-uncertainty-assessment}{%
+\chapter{Step 4: uncertainty assessment}\label{step-4-uncertainty-assessment}}
+
+\hypertarget{reporting-results}{%
+\chapter{Reporting results}\label{reporting-results}}
+
+\hypertarget{compendium-of-r-scripts}{%
+\chapter{Compendium of R scripts}\label{compendium-of-r-scripts}}
 
 \hypertarget{references}{%
 \chapter*{References}\label{references}}
@@ -935,8 +775,32 @@ The R Markdown Cookbook provides more help on how to use custom blocks to design
 
 \hypertarget{refs}{}
 \begin{CSLReferences}{0}{0}
-\leavevmode\vadjust pre{\hypertarget{ref-xie2015}{}}%
-\textbf{Xie, Y.} 2015. \emph{Dynamic documents with {R} and knitr}. 2nd edition. Boca Raton, Florida, Chapman; Hall/CRC. (also available at \url{http://yihui.org/knitr/}).
+\leavevmode\vadjust pre{\hypertarget{ref-Behrens2014}{}}%
+\textbf{Behrens, T., Schmidt, K., Ramirez-Lopez, L., Gallant, J., Zhu, A.-X. \& Scholten, T.} 2014. Hyper-scale digital soil mapping and soil formation analysis, 213: 578--588. \url{https://doi.org/10.1016/j.geoderma.2013.07.031}
+
+\leavevmode\vadjust pre{\hypertarget{ref-Behrens2010}{}}%
+\textbf{Behrens, T., Zhu, A.-X., Schmidt, K. \& Scholten, T.} 2010. Multi-scale digital terrain analysis and feature selection for digital soil mapping, 155: 175--185. \url{https://doi.org/10.1016/j.geoderma.2009.07.010}
+
+\leavevmode\vadjust pre{\hypertarget{ref-Bishop1999}{}}%
+\textbf{Bishop, T.F.A., McBratney, A.B. \& Laslett, G.M.} 1999. Modelling soil attribute depth functions with equal-area quadratic smoothing splines, 91: 27--45. \url{https://doi.org/10.1016/s0016-7061(99)00003-8}
+
+\leavevmode\vadjust pre{\hypertarget{ref-Breiman2001}{}}%
+\textbf{Breiman, L.} 2001. Random forests. \emph{Machine Learning}, 45(1): 5--32. \url{https://doi.org/10.1023/A:1010933404324}
+
+\leavevmode\vadjust pre{\hypertarget{ref-Hengl2017}{}}%
+\textbf{Hengl, T., Leenaars, J.G.B., Shepherd, K.D., Walsh, M.G., Heuvelink, G.B.M., Mamo, T., Tilahun, H., Berkhout, E., Cooper, M., Fegraus, E., Wheeler, I. \& Kwabena, N.A.} 2017. Soil nutrient maps of sub-saharan africa: Assessment of soil nutrient content at 250 m spatial resolution using machine learning, 109: 77--102. \url{https://doi.org/10.1007/s10705-017-9870-x}
+
+\leavevmode\vadjust pre{\hypertarget{ref-Kuhn2022}{}}%
+\textbf{Kuhn, M.} 2022. \emph{Caret: Classification and regression training}. (also available at \url{https://CRAN.R-project.org/package=caret}).
+
+\leavevmode\vadjust pre{\hypertarget{ref-Malone2009}{}}%
+\textbf{Malone, B.P., McBratney, A.B., Minasny, B. \& Laslett, G.M.} 2009. Mapping continuous depth functions of soil carbon storage and available water capacity, 154: 138--152. \url{https://doi.org/10.1016/j.geoderma.2009.10.007}
+
+\leavevmode\vadjust pre{\hypertarget{ref-McBratney2003}{}}%
+\textbf{McBratney, A.B., Santos, M.L.M. \& Minasny, B.} 2003. On digital soil mapping, 117: 3--52. \url{https://doi.org/10.1016/s0016-7061(03)00223-4}
+
+\leavevmode\vadjust pre{\hypertarget{ref-Meinshausen2006}{}}%
+\textbf{Meinshausen, Ni.} 2006. Quantile regression forests. \emph{Journal of Machine Learning Research}, 7(6).
 
 \end{CSLReferences}
 

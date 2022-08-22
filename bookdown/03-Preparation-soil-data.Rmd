@@ -1,9 +1,0 @@
-# Product specifications
-x
-## Generic target specification
-
-
-
-## Metadata specifications
-
-
