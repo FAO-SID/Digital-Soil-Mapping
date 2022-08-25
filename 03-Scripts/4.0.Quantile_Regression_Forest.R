@@ -1,34 +1,43 @@
-#######################################################
+#_______________________________________________________________________________
 #
 # Quantile Regression Forest
 # Soil Property Mapping
 #
 # GSP-Secretariat
 # Contact: Isabel.Luotto@fao.org
-#
-#######################################################
+#          Marcos.Angelini@fao.org
+#_______________________________________________________________________________
 
 #Empty environment and cache 
-rm(list = ls());
+rm(list = ls())
 gc()
 
-#######################################################
-#
-#  User defined variables: ----
+# Content of this script =======================================================
+# 0 - Set working directory, soil attribute, and packages
+# 1 - Merge soil data with environmental covariates 
+# 2 - Covariate selection
+# 3 - Model calibration
+# 4 - Uncertainty assessment
+# 5 - Prediction
+# 6 - Export final maps
+#_______________________________________________________________________________
+
+
+# 0 - Set working directory, soil attribute, and packages ======================
 
 # Working directory
-#wd <- 'C:/Users/luottoi/Documents/GitHub/Digital-Soil-Mapping'
-wd <- 'C:/Users/hp/Documents/GitHub/Digital-Soil-Mapping'
+# wd <- 'C:/Users/luottoi/Documents/GitHub/Digital-Soil-Mapping'
+setwd('C:/Users/hp/Documents/GitHub/Digital-Soil-Mapping')
 
+# Load Area of interest (shp)
 AOI <- '01-Data/MKD.shp'
-soilatt <- 'OCS'
 
+# Terget soil attribute
+soilatt <- 'ocs_0_30'
 
-#
-#
-#######################################################
-# Set working directory
-setwd(wd)
+# Function for Uncertainty Assessment
+load("03-Scripts/eval.RData")
+
 #load packages
 library(tidyverse)
 library(data.table)
@@ -39,30 +48,37 @@ library(sf)
 library(doParallel)
 
 
-# Make a selection of covariates, calibrate a QRF model, make a prediction ----
+# 1 - Merge soil data with environmental covariates ============================
 
-#Load data and covariates 
-files <- list.files(path= '01-Data/covs/', pattern = '.tif*', full.names = T)
-files <- files[!(grepl('aux', files))]
-covs <-rast(files)
+## 1.1 - Load covariates -------------------------------------------------------
+files <- list.files(path= '01-Data/covs/', pattern = '.tif$', full.names = T)
+covs <- rast(files)
+ncovs <- names(covs)
 
-# Load the processed data for digital soil mapping (Script 2) as a spatial object
-dat <- read.csv(paste0("02-Outputs/",soilatt,"_dat.csv"))
-dat <- vect(dat, geom=c("X", "Y"))
+## 1.2 - Load the soil data (Script 2) -----------------------------------------
+dat <- read_csv("02-Outputs/soil_data.csv")
+
+# Convert soil data into a spatial object (check https://epsg.io/6204)
+dat <- vect(dat, geom=c("x", "y"), crs = "epsg:6204")
+
+# Reproject point coordinates to match coordinate system of covariates
+dat <- terra::project(dat, covs)
 names(dat)
 
-# Extract values from covariates to the soil points
-pv <- terra::extract(x = covs, y = dat,xy=F)
+## 1.3 - Extract values from covariates to the soil points ---------------------
+pv <- terra::extract(x = covs, y = dat, xy=F)
 dat <- cbind(dat,pv)
+dat <- as.data.frame(dat)
 
 summary(dat)
 
-# Remove NA values
-dat <-as.data.frame(dat)
-dat <- dat[complete.cases(dat),]
+## 1.4 - Target soil attribute + covariates ------------------------------------
+d <- select(dat, soilatt, names(covs))
+d <- na.omit(d)
 
-# Define a formila  and QRF parameters (set 3 times repeated 10-fold cross-validation)
-
+# 2 - Covariate selection with RFE =============================================
+## 2.1 - Setting parameters ----------------------------------------------------
+# Repeatedcv = 3-times repeated 10-fold cross-validation
 fitControl <- rfeControl(functions = rfFuncs,
                          method = "repeatedcv",
                          number = 10,         ## 10 -fold CV
@@ -70,74 +86,107 @@ fitControl <- rfeControl(functions = rfFuncs,
                          verbose = TRUE,
                          saveDetails = TRUE)
 
-
-tuneGrid <-  expand.grid(mtry = c(100, 200, 500))
-
-#Calibrate the model using multiple cores
-fm = as.formula(paste(soilatt," ~", paste0(names(covs),
+# Set the regression function
+fm = as.formula(paste(soilatt," ~", paste0(ncovs,
                                              collapse = "+")))
 
-
-#Calibrate the model using multiple cores
+# Calibrate the model using multiple cores
 cl <- makeCluster(detectCores()-1)
 registerDoParallel(cl)
 
 
-# Select covariates based on recursive feature elimination ----
+## 2.2 - Calibrate a RFE model to select covariates ----------------------------
 covsel <- rfe(fm,
-             data = dat,  
-             sizes = 10:(length(dat)-2),
-             #method = "rf",
-             rfeControl = fitControl,
-             verbose = TRUE,
-             tuneGrid = tuneGrid,
-             keep.inbag = T)
-#Extract selection of covariates and subset covs
-covsel <- covsel$optVariables 
-covs <- covs[[covsel]]
+              data = d,  
+              sizes = 10:(length(d)-1),
+              rfeControl = fitControl,
+              verbose = TRUE,
+              keep.inbag = T)
+stopCluster(cl)
+covsel
+## 2.3 - Plot selection of covariates ------------------------------------------
+trellis.par.set(caretTheme())
+plot(covsel, type = c("g", "o"))
 
-#update formula
-#Calibrate the model using multiple cores
-fm = as.formula(paste(soilatt," ~", paste0(names(covs),
-                                           collapse = "+")))
+# Extract selection of covariates and subset covs
+opt_covs <- covsel$optVariables 
 
+# 3 - QRF Model calibration ====================================================
+## 3.1 - Update formula with the selected covariates ---------------------------
+fm <- as.formula(paste(soilatt," ~", paste0(opt_covs, collapse = "+")))
 
-# Run quantile regression forest
+# parallel processing
+cl <- makeCluster(detectCores()-1)
+registerDoParallel(cl)
+
+## 3.2 - Set training parameters -----------------------------------------------
+fitControl <- trainControl(method = "repeatedcv",
+                           number = 10,         ## 10 -fold CV
+                           repeats = 3,        ## repeated 3 times
+                           savePredictions = TRUE)
+
+# Tune mtry hyperparameters
+tuneGrid <-  expand.grid(mtry = c(500))
+
+## 3.3 - Calibrate the QRF model -----------------------------------------------
 model <- caret::train(fm,
-                      data = dat[, c(soilatt,names(covs))],
+                      data = d,
                       method = "qrf",
                       trControl = fitControl,
                       verbose = TRUE,
                       tuneGrid = tuneGrid,
-                      keep.inbag = T)
-print(model)
-
-
-#Extract predictor importance as relative values (%)
-model$importance <-
-  data.frame(var=rownames(importance(model$finalModel)),
-             importance(model$finalModel)/sum(importance(model$finalModel))*100) %>%
-  arrange(desc(IncNodePurity))
-
-# print(model)
-saveRDS(model, file = paste0("02-Outputs/models/model_",soilatt,".rds"))
-
+                      keep.inbag = T,
+                      importance = TRUE)
 stopCluster(cl)
 gc()
 
 
+## 3.4 - Extract predictor importance as relative values (%)
+model$importance <-
+  data.frame(var=rownames(arrange(x$importance, desc(Overall))),
+             arrange(x$importance, desc(Overall))) 
 
-# Generation of maps (prediction of soil attributes) ----
-#Produce tiles
+## 3.5 - Print and save model --------------------------------------------------
+print(model)
+saveRDS(model, file = paste0("02-Outputs/models/model_",soilatt,".rds"))
+
+# 4 - Uncertainty assessment ===================================================
+# extract observed and predicted values
+o <- model$pred$obs
+p <- model$pred$pred
+df <- data.frame(o,p)
+
+## 4.1 - Plot and save scatterplot --------------------------------------------- 
+(g1 <- ggplot(df, aes(x = o, y = p)) + 
+  geom_abline(slope = 1, intercept = 0, color = "red")+
+  geom_point(alpha = 0.2) + 
+  ylim(c(min(o), max(o))) + theme(aspect.ratio=1)+ 
+  labs(title = soilatt) + 
+  xlab("Observed") + ylab("Predicted"))
+ggsave(g1, filename = paste0("02-Outputs/residuals_",soilatt,".png"), scale = 1, 
+       units = "cm", width = 12, height = 12)
+
+## 4.2 - Print accuracy coeficients --------------------------------------------
+# https://github.com/AlexandreWadoux/MapQualityEvaluation
+eval(o,p)
+
+## 4.3 - Plot Covariate importance ---------------------------------------------
+(g2 <- varImpPlot(model$finalModel, main = soilatt, type = 1))
+
+png(filename = paste0("02-Outputs/importance_",soilatt,".png"), 
+    width = 15, height = 15, units = "cm", res = 600)
+g2
+dev.off()
+
+# 5 - Prediction ===============================================================
+# Generation of maps (prediction of soil attributes) 
+## 5.1 - Produce tiles ---------------------------------------------------------
 r <-covs[[1]]
 t <- rast(nrows = 5, ncols = 5, extent = ext(r), crs = crs(r))
 tile <- makeTiles(r, t,overwrite=TRUE,filename="02-Outputs/tiles/tiles.tif")
 
-
-
-#Predict soil attributes per tiles 
+## 5.2 - Predict soil attributes per tiles -------------------------------------
 # loop to predict on each tile
-
 
 for (j in seq_along(tile)) {
   gc()
@@ -146,13 +195,10 @@ for (j in seq_along(tile)) {
   
   
   # plot(r)# 
-  pred_mean <- terra::predict(covst, model = final_mod, na.rm=TRUE,  
-                              cpkgs="randomForest", what=mean,
-                              # filename = paste0("02-Outputs/Final Maps/tiles/OCS_tile_", j, ".tif"),
-                              # overwrite = TRUE
-  )
-  pred_sd <- terra::predict(covst, model = final_mod, na.rm=TRUE,  
-                            cpkgs="randomForest", what=sd)  
+  pred_mean <- terra::predict(covst, model = model$finalModel, na.rm=TRUE,  
+                              cpkgs="quantregForest", what=mean)
+  pred_sd <- terra::predict(covst, model = model$finalModel, na.rm=TRUE,  
+                            cpkgs="quantregForest", what=sd)  
   
   
   
@@ -168,11 +214,13 @@ for (j in seq_along(tile)) {
   # 
   # ##################################  
   
-  
-  
-  writeRaster(pred_mean, filename = paste0("02-Outputs/tiles/soilatt_tiles/",soilatt,"_tile_", j, ".tif"), 
+  writeRaster(pred_mean, 
+              filename = paste0("02-Outputs/tiles/soilatt_tiles/",
+                                soilatt,"_tile_", j, ".tif"), 
               overwrite = TRUE)
-  writeRaster(pred_sd, filename = paste0("02-Outputs/tiles/soilatt_tiles/",soilatt,"_tileSD_", j, ".tif"), 
+  writeRaster(pred_sd, 
+              filename = paste0("02-Outputs/tiles/soilatt_tiles/",
+                                soilatt,"_tileSD_", j, ".tif"), 
               overwrite = TRUE)
   
   rm(pred_mean)
@@ -182,13 +230,15 @@ for (j in seq_along(tile)) {
   print(paste("tile",tile[j]))
 }
 
-#Merge tiles both prediction and st.Dev
-f_mean <- list.files(path = "02-Outputs/tiles/soilatt_tiles/", pattern = paste0(soilatt,"_tile_"), full.names = TRUE)
-f_sd <- list.files(path = "02-Outputs/tiles/soilatt_tiles/", pattern =  paste0(soilatt,"_tileSD_"), full.names = TRUE)
+## 5.3 - Merge tiles both prediction and st.Dev --------------------------------
+f_mean <- list.files(path = "02-Outputs/tiles/soilatt_tiles/", 
+                     pattern = paste0(soilatt,"_tile_"), full.names = TRUE)
+f_sd <- list.files(path = "02-Outputs/tiles/soilatt_tiles/", 
+                   pattern =  paste0(soilatt,"_tileSD_"), full.names = TRUE)
 r_mean_l <- list()
 r_sd_l <- list()
+
 for (g in 1:length(f_mean)){
-  
   r <- rast(f_mean[g])
   r_mean_l[g] <-r
   rm(r)
@@ -200,7 +250,6 @@ for (g in 1:length(f_sd)){
   r_sd_l[g] <-r
   rm(r)
 }
-
 r_mean <-sprc(r_mean_l)
 r_sd <-sprc(r_sd_l)
 pred_mean <- mosaic(r_mean)
@@ -215,9 +264,13 @@ plot(pred_mean)
 plot(pred_sd)
 
 
-# Export final rasters ---- 
-writeRaster(pred_mean, paste0("02-Outputs/maps/",soilatt,"_QRF.tif"),overwrite=TRUE)
-writeRaster(pred_sd, paste0("02-Outputs/maps/",soilatt,"_QRF_SD.tif"),overwrite=TRUE)
+# 6 - Export final maps ========================================================
+writeRaster(pred_mean, 
+            paste0("02-Outputs/maps/",soilatt,"_QRF.tif"),
+            overwrite=TRUE)
+writeRaster(pred_sd, 
+            paste0("02-Outputs/maps/",soilatt,"_QRF_SD.tif"),
+            overwrite=TRUE)
 
 
 
