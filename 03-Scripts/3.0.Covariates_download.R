@@ -1,6 +1,6 @@
-#######################################################
-#
-#  Process and download covariates
+#_______________________________________________________________________________
+#  
+#Process and download covariates
 #  from GEE R 
 #
 #  Export both raw covariates and PCAs
@@ -9,16 +9,31 @@
 #  Contacts:  Marcos.Angelini@fao.org
 #             Isabel.Luotto@fao.org
 #
-#######################################################
+#______________________________________________________________________________
 
-#Empty environment and cache ----
+
+#Empty environment and cache
 rm(list = ls());
 gc()
 
-#######################################################
-#
-#  User defined variables:
+# Content of this script =======================================================
+# The goal of this script is to organise to clip and dowload the covariates and 
+# it includes the following steps:
+# 
+# 0 -User-defined variables 
+# 1 - Set working directory and load necessary packages
+# 2 - Import shapefile
+# 3 - Overview of covariates 
+# 4 - Initialize GEE
+# 5 - Upload shapefile to GEE OR use uploaded UN borders
+# 6 - Clip and download climatic layers 
+# 7 - Clip and download vegetation layers
+# 8 - Clip and download land cover layers
+# 9 - Clip and download terrain attribute layers
+#_______________________________________________________________________________
 
+
+# 0 - User-defined variables =======================================================
 # Working directory
 #wd <- 'C:/Users/luottoi/Documents/GitHub/Digital-Soil-Mapping'
 wd <- 'C:/Users/hp/Documents/GitHub/Digital-Soil-Mapping'
@@ -30,35 +45,28 @@ output_dir <-'01-Data/covs/'
 # Area of interest: either own shapefile or 3-digit ISO code to extract from UN 2020 boundaries
 #AOI <- '01-Data/MKD.shp'
 AOI <- 'MKD'
-#Start and End time 
-start_T <- "2017-01-01"
-end_T <- "2017-12-31"
-
-# Resolution and projectio
+# Resolution and projection
 res = 250
 crs = "EPSG:4326"
+#_______________________________________________________________________________
 
-#
-#
-#######################################################
-
-
-# Load libraries ----
+#  1 - Set working directory and load necessary packages ======================= 
+# Set working directory
+setwd(wd)
+#load libraries
 library(raster)
 library(sf)
 library(rgee)
 
-# Set working directory ----
-setwd(wd)
 
-# Upload own AOI shapefile ----
+# 2 - Import shapefile =========================================================
 #AOI <- read_sf(AOI)
 # convert AOI to a box polygon
 #AOI <- st_as_sfc(st_bbox(AOI))
 #AOI <- st_as_sf(AOI)
 
 
-#Overview of covariates ----
+# 3 - Overview of covariates ===================================================
 # CLIMATIC VARIABLES from CHELSA
 # VEGETATION INDICES, FPAR and LAND SURFACE TEMPERATURE from MODIS
 # LAND COVER LAYERS from Dynamic World 10m near-real-time (NRT) 
@@ -67,16 +75,15 @@ setwd(wd)
 # for more information about the single covariates: open covariates.xslx in the 
 # training material folder
 
-#Initialize GEE ----
+# 4 - Initialize GEE ===========================================================
 ee_Initialize()
 
-#Initial setup either convert shp to gee geometry or extract from UN 2020 map----
-
-#Convert shp to gee geometry
+# 5 - Upload shapefile to GEE OR use uploaded UN borders =======================
+## 5.1 Convert shp to gee geometry ---------------------------------------------
 #region <- sf_as_ee(AOI)
 #region = region$geometry()
 
-#Extract from UN 2020 map using ISO code ----
+## 5.2 Extract from UN 2020 map using ISO code ---------------------------------
 region <-ee$FeatureCollection("projects/digital-soil-mapping-gsp-fao/assets/UN_BORDERS/BNDA_CTY")%>%
   ee$FeatureCollection$filterMetadata('ISO3CD', 'equals', AOI)
 
@@ -85,8 +92,8 @@ write_sf(AOI_shp, paste0('01-Data/',AOI,'.shp'))
 
 region = region$geometry()
 
-# CLIMATIC VARIABLES ----
-#Obtain list of climatic variables
+# 6 - Clip and download climatic layers ========================================
+# Obtain list of climatic variables
 assetname_clim <-  ee_manage_assetlist(path_asset = "projects/digital-soil-mapping-gsp-fao/assets/CHELSA")
 
 # Loop over the names of assets to clip and dowload the covariates
@@ -117,7 +124,7 @@ for (i in unique(assetname_clim$ID)){
   
 }
 
-# VEGETATION INDICES ----
+# 7 - Clip and download vegetation layers ======================================
 #Obtain list of modis variables
 assetname_veg <-  ee_manage_assetlist(path_asset = "projects/digital-soil-mapping-gsp-fao/assets/MODIS")
 
@@ -150,7 +157,7 @@ for (i in unique(assetname_veg$ID)){
 }
 
 
-#  LAND COVER LAYERS ----
+# 8 - Clip and download land cover layers ======================================
 #Obtain list of landcover variables
 assetname_lc <-  ee_manage_assetlist(path_asset = "projects/digital-soil-mapping-gsp-fao/assets/LANDCOVER")
 
@@ -182,7 +189,7 @@ for (i in unique(assetname_lc$ID)){
   
 }
 
-# TERRAIN ATTRIBUTES ----
+# 9 - Clip and download terrain attribute layers ===============================
 #Obtain list of terrain attributes
 assetname_ta <-  ee_manage_assetlist(path_asset = "projects/digital-soil-mapping-gsp-fao/assets/OPENLANDMAP")
 
