@@ -5,6 +5,7 @@
 #
 # GSP-Secretariat
 # Contact: Isabel.Luotto@fao.org
+#          Marcos.Angelini@fao.org
 #_______________________________________________________________________________
 
 
@@ -13,6 +14,8 @@ gc()
 
 # Content of this script =======================================================
 # The goal of this script is to organise the soil data for mapping, including:
+# 
+# User-defined variables 
 # 0 - Set working directory and load necessary packages
 # 1 - Import national data 
 # 2 - select useful columns
@@ -23,16 +26,20 @@ gc()
 # 7 - Plot and save results
 #_______________________________________________________________________________
 
+# User-defined variables =======================================================
+wd <- 'C:/Users/hp/Documents/GitHub/Digital-Soil-Mapping'
+#wd <- "C:/GIT/Digital-Soil-Mapping"
+
 # 0 - Set working directory and load necessary packages ========================
-setwd("C:/GIT/Digital-Soil-Mapping") # change the path accordingly
+setwd(wd) # change the path accordingly
 
 library(tidyverse) # for data management and reshaping
 library(readxl) # for importing excel files
 library(mapview) # for seing the profiles in a map
 library(sf) # to manage spatial data (shp vectors) 
 library(aqp) # for soil profile data
-require("devtools") 
-devtools::install_bitbucket("brendo1001/ithir/pkg") #install ithir package
+# require("devtools") 
+# devtools::install_bitbucket("brendo1001/ithir/pkg") #install ithir package
 library(ithir) # for horizon harmonization
 
 
