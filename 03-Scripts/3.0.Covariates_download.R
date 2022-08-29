@@ -33,7 +33,7 @@ gc()
 #_______________________________________________________________________________
 
 
-# 0 - User-defined variables =======================================================
+# 0 - User-defined variables ===================================================
 # Working directory
 #wd <- 'C:/Users/luottoi/Documents/GitHub/Digital-Soil-Mapping'
 wd <- 'C:/Users/hp/Documents/GitHub/Digital-Soil-Mapping'
@@ -42,7 +42,8 @@ wd <- 'C:/Users/hp/Documents/GitHub/Digital-Soil-Mapping'
 #output_dir <-''
 output_dir <-'01-Data/covs/'
 
-# Area of interest: either own shapefile or 3-digit ISO code to extract from UN 2020 boundaries
+# Area of interest: either own shapefile or 3-digit ISO code to extract from 
+# UN 2020 boundaries
 #AOI <- '01-Data/MKD.shp'
 AOI <- 'MKD'
 # Resolution and projection
@@ -88,9 +89,8 @@ region <-ee$FeatureCollection("projects/digital-soil-mapping-gsp-fao/assets/UN_B
   ee$FeatureCollection$filterMetadata('ISO3CD', 'equals', AOI)
 
 AOI_shp <-ee_as_sf(region)
+AOI_shp <- st_collection_extract(AOI_shp, "POLYGON")
 write_sf(AOI_shp, paste0('01-Data/',AOI,'.shp'))
-
-region = region$geometry()
 
 # 6 - Clip and download climatic layers ========================================
 # Obtain list of climatic variables
@@ -99,6 +99,9 @@ assetname_clim <-  ee_manage_assetlist(path_asset = "projects/digital-soil-mappi
 # Loop over the names of assets to clip and dowload the covariates
 for (i in unique(assetname_clim$ID)){
   
+  region <-ee$FeatureCollection("projects/digital-soil-mapping-gsp-fao/assets/UN_BORDERS/BNDA_CTY")%>%
+    ee$FeatureCollection$filterMetadata('ISO3CD', 'equals', AOI)
+  region = region$geometry()
   #Extract filename 
   filename <- sub('.*\\/', '', i)
   
@@ -116,12 +119,13 @@ for (i in unique(assetname_clim$ID)){
     image = image,
     scale= res,
     region = region,
-    via = "drive"
+    via = "drive",
+    maxPixels = 1e+12
   )
   
   writeRaster(raster, paste0(output_dir,filename, '.tif'), overwrite=T)
   print(paste(filename, 'exported successfully'))
-  
+  plot(raster)
 }
 
 # 7 - Clip and download vegetation layers ======================================
@@ -131,6 +135,9 @@ assetname_veg <-  ee_manage_assetlist(path_asset = "projects/digital-soil-mappin
 # Loop over the names of assets to clip and dowload the covariates
 for (i in unique(assetname_veg$ID)){
   
+  region <-ee$FeatureCollection("projects/digital-soil-mapping-gsp-fao/assets/UN_BORDERS/BNDA_CTY")%>%
+    ee$FeatureCollection$filterMetadata('ISO3CD', 'equals', AOI)
+  region = region$geometry()
   #Extract filename 
   filename <- sub('.*\\/', '', i)
   
@@ -153,7 +160,7 @@ for (i in unique(assetname_veg$ID)){
   
   writeRaster(raster, paste0(output_dir,filename, '.tif'), overwrite=T)
   print(paste(filename, 'exported successfully'))
-  
+  plot(raster)
 }
 
 
@@ -164,6 +171,9 @@ assetname_lc <-  ee_manage_assetlist(path_asset = "projects/digital-soil-mapping
 # Loop over the names of assets to clip and dowload the covariates
 for (i in unique(assetname_lc$ID)){
   
+  region <-ee$FeatureCollection("projects/digital-soil-mapping-gsp-fao/assets/UN_BORDERS/BNDA_CTY")%>%
+    ee$FeatureCollection$filterMetadata('ISO3CD', 'equals', AOI)
+  region = region$geometry()
   #Extract filename 
   filename <- sub('.*\\/', '', i)
   
@@ -186,7 +196,7 @@ for (i in unique(assetname_lc$ID)){
   
   writeRaster(raster, paste0(output_dir,filename, '.tif'), overwrite=T)
   print(paste(filename, 'exported successfully'))
-  
+  plot(raster)
 }
 
 # 9 - Clip and download terrain attribute layers ===============================
@@ -196,6 +206,9 @@ assetname_ta <-  ee_manage_assetlist(path_asset = "projects/digital-soil-mapping
 # Loop over the names of assets to clip and download the covariates
 for (i in unique(assetname_ta$ID)){
   
+  region <-ee$FeatureCollection("projects/digital-soil-mapping-gsp-fao/assets/UN_BORDERS/BNDA_CTY")%>%
+    ee$FeatureCollection$filterMetadata('ISO3CD', 'equals', AOI)
+  region = region$geometry()
   #Extract filename 
   filename <- sub('.*\\/', '', i)
   
@@ -218,7 +231,7 @@ for (i in unique(assetname_ta$ID)){
   
   writeRaster(raster, paste0(output_dir,filename, '.tif'), overwrite=T)
   print(paste(filename, 'exported successfully'))
-  
+  plot(raster)
 }
 
 
