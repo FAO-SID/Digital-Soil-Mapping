@@ -56,6 +56,7 @@ crs = "EPSG:4326"
 setwd(wd)
 #load libraries
 library(raster)
+library(terra)
 library(sf)
 library(rgee)
 
@@ -91,7 +92,8 @@ region <-ee$FeatureCollection("projects/digital-soil-mapping-gsp-fao/assets/UN_B
 AOI_shp <-ee_as_sf(region)
 AOI_shp <- st_collection_extract(AOI_shp, "POLYGON")
 write_sf(AOI_shp, paste0('01-Data/',AOI,'.shp'))
-
+aoi <- vect(AOI_shp)
+  
 # 6 - Clip and download climatic layers ========================================
 # Obtain list of climatic variables
 assetname_clim <-  ee_manage_assetlist(path_asset = "projects/digital-soil-mapping-gsp-fao/assets/CHELSA")
@@ -122,10 +124,11 @@ for (i in unique(assetname_clim$ID)){
     via = "drive",
     maxPixels = 1e+12
   )
-  
-  writeRaster(raster, paste0(output_dir,filename, '.tif'), overwrite=T)
+  r <- rast(raster)
+  r <- mask(r, aoi)
+  plot(r)
+  writeRaster(r, paste0(output_dir,filename, '.tif'), overwrite=T)
   print(paste(filename, 'exported successfully'))
-  plot(raster)
 }
 
 # 7 - Clip and download vegetation layers ======================================
@@ -157,10 +160,11 @@ for (i in unique(assetname_veg$ID)){
     region = region,
     via = "drive"
   )
-  
-  writeRaster(raster, paste0(output_dir,filename, '.tif'), overwrite=T)
+  r <- rast(raster)
+  r <- mask(r, aoi)
+  plot(r)
+  writeRaster(r, paste0(output_dir,filename, '.tif'), overwrite=T)
   print(paste(filename, 'exported successfully'))
-  plot(raster)
 }
 
 
@@ -193,10 +197,11 @@ for (i in unique(assetname_lc$ID)){
     region = region,
     via = "drive"
   )
-  
-  writeRaster(raster, paste0(output_dir,filename, '.tif'), overwrite=T)
+  r <- rast(raster)
+  r <- mask(r, aoi)
+  plot(r)
+  writeRaster(r, paste0(output_dir,filename, '.tif'), overwrite=T)
   print(paste(filename, 'exported successfully'))
-  plot(raster)
 }
 
 # 9 - Clip and download terrain attribute layers ===============================
@@ -228,10 +233,11 @@ for (i in unique(assetname_ta$ID)){
     region = region,
     via = "drive"
   )
-  
-  writeRaster(raster, paste0(output_dir,filename, '.tif'), overwrite=T)
+  r <- rast(raster)
+  r <- mask(r, aoi)
+  plot(r)
+  writeRaster(r, paste0(output_dir,filename, '.tif'), overwrite=T)
   print(paste(filename, 'exported successfully'))
-  plot(raster)
 }
 
 
