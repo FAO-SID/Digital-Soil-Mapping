@@ -9,7 +9,7 @@
 #  Contacts:  Marcos.Angelini@fao.org
 #             Isabel.Luotto@fao.org
 #
-#______________________________________________________________________________
+#_______________________________________________________________________________
 
 
 #Empty environment and cache
@@ -109,12 +109,14 @@ for (i in unique(assetname_clim$ID)){
   
   #Clip image to the extent of the AOI
   image <- ee$Image(i) %>%
-    ee$Image$clip(region)
+    ee$Image$clip(region)%>%
+    ee$Image$toFloat()
   
   # Resample to target resolution
     image = image$resample('bilinear')$reproject(
     crs= crs,
     scale= res)
+    
   
   #Export clipped covariate as raster
   raster <- ee_as_raster(
@@ -146,7 +148,8 @@ for (i in unique(assetname_veg$ID)){
   
   #Clip image to the extent of the AOI
   image <- ee$Image(i) %>%
-    ee$Image$clip(region)
+    ee$Image$clip(region)%>%
+    ee$Image$toFloat()
   
   # Resample to target resolution
     image = image$resample('bilinear')$reproject(
@@ -183,7 +186,8 @@ for (i in unique(assetname_lc$ID)){
   
   #Clip image to the extent of the AOI
   image <- ee$Image(i) %>%
-    ee$Image$clip(region)
+    ee$Image$clip(region)%>%
+    ee$Image$toFloat()
   
   # # Resample to target resolution
   #   image = image$resample('bilinear')$reproject(
@@ -219,13 +223,15 @@ for (i in unique(assetname_ta$ID)){
   
   #Clip image to the extent of the AOI
   image <- ee$Image(i) %>%
-    ee$Image$clip(region)
+    ee$Image$clip(region)%>%
+    ee$Image$toFloat()
   
   # # Resample to target resolution
   #   image = image$resample('bilinear')$reproject(
   #   crs= crs,
   #   scale= res)
   
+  #image =   image$unmask(0)
   #Export clipped covariate as raster
   raster <- ee_as_raster(
     image = image,
