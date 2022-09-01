@@ -8,7 +8,7 @@
 #          Marcos.Angelini@fao.org
 #_______________________________________________________________________________
 
-
+#Empty environment and cache 
 rm(list = ls())
 gc()
 
