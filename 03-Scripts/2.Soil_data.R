@@ -26,7 +26,7 @@ gc()
 # 8 - Plot and save results
 #_______________________________________________________________________________
 
-# 0 - User-defined variables =======================================================
+# 0 - User-defined variables ===================================================
 wd <- 'C:/Users/hp/Documents/GitHub/Digital-Soil-Mapping'
 #wd <- "C:/GIT/Digital-Soil-Mapping"
 
@@ -35,7 +35,7 @@ setwd(wd) # change the path accordingly
 
 library(tidyverse) # for data management and reshaping
 library(readxl) # for importing excel files
-library(mapview) # for seing the profiles in a map
+library(mapview) # for seeing the profiles in a map
 library(sf) # to manage spatial data (shp vectors) 
 library(aqp) # for soil profile data
 # require("devtools") 
@@ -70,7 +70,7 @@ summary(site)
 summary(hor)
 
 # 3 - select useful columns ====================================================
-## 3.1 - select columns ---------------------------------------------
+## 3.1 - select columns --------------------------------------------------------
 hor <- select(hor, ProfID, HorID, top, bottom, humus, bd, 
               crf=coarse_frag, clay, ph=ph_h2o)
 hor$soc <- hor$humus/1.724
