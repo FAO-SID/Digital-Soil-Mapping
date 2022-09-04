@@ -127,15 +127,9 @@ write_rds(clean_prof, "01-Data/soilProfileCollection.rds")
 
 ## 4.6 convert soilProfileCollection to a table --------------------------------
 dat <- left_join(clean_prof@site, clean_prof@horizons)
-dat <- dat <- select(dat, ProfID, HorID, x, y, year, top, bottom, bd:soc )
+dat <- select(dat, ProfID, HorID, x, y, year, top, bottom, bd:soc )
 
 # 5 - Estimate BD Stock using pedotransfer functions ==========================
-
-## 5.1 - Select a pedotransfer function ----------------------------------------
-# create a vector of BD values to test the best fitting pedotransfer function
-BD_test <- tibble(SOC = clean_prof@horizons$soc, 
-                  BD_test = clean_prof@horizons$bd)
-BD_test <-  na.omit(BD_test)
 
 # create the function with all PTF
 estimateBD <- function(SOC=NULL, method=NULL){
@@ -148,6 +142,12 @@ estimateBD <- function(SOC=NULL, method=NULL){
   if(method=="Honeyset_Ratkowsky1989"){BD <- 1/(0.564 + 0.0556 * OM)}
   return(BD)
 }
+
+## 5.1 - Select a pedotransfer function ----------------------------------------
+# create a vector of BD values to test the best fitting pedotransfer function
+BD_test <- tibble(SOC = clean_prof@horizons$soc, 
+                  BD_test = clean_prof@horizons$bd)
+BD_test <-  na.omit(BD_test)
 
 ## 5.2 - Estimate BLD for a subset using the pedotransfer functions ------------
 BD_test$Saini <- estimateBD(BD_test$SOC, method="Saini1996")
