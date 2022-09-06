@@ -26,17 +26,14 @@ gc()
 # 3 - Overview of covariates 
 # 4 - Initialize GEE
 # 5 - Upload shapefile to GEE OR use uploaded UN borders
-# 6 - Clip and download climatic layers 
-# 7 - Clip and download vegetation layers
-# 8 - Clip and download land cover layers
-# 9 - Clip and download terrain attribute layers
+# 6 - Clip and download the covariates
 #_______________________________________________________________________________
 
 
 # 0 - User-defined variables ===================================================
 # Working directory
-#wd <- 'C:/Users/luottoi/Documents/GitHub/Digital-Soil-Mapping'
-wd <- 'C:/Users/hp/Documents/GitHub/Digital-Soil-Mapping'
+wd <- 'C:/Users/luottoi/Documents/GitHub/Digital-Soil-Mapping'
+#wd <- 'C:/Users/hp/Documents/GitHub/Digital-Soil-Mapping'
 
 # Output covariate folder
 #output_dir <-''
@@ -88,22 +85,24 @@ ee_Initialize()
 ## 5.2 Extract from UN 2020 map using ISO code ---------------------------------
 region <-ee$FeatureCollection("projects/digital-soil-mapping-gsp-fao/assets/UN_BORDERS/BNDA_CTY")%>%
   ee$FeatureCollection$filterMetadata('ISO3CD', 'equals', AOI)
-
-AOI_shp <-ee_as_sf(region)
-AOI_shp <- st_collection_extract(AOI_shp, "POLYGON")
-write_sf(AOI_shp, paste0('01-Data/',AOI,'.shp'))
-aoi <- vect(AOI_shp)
+region = region$geometry()
+# AOI_shp <-ee_as_sf(region)
+# AOI_shp <- st_collection_extract(AOI_shp, "POLYGON")
+# write_sf(AOI_shp, paste0('01-Data/',AOI,'.shp'))
+# aoi <- vect(AOI_shp)
   
-# 6 - Clip and download climatic layers ========================================
+# 6 - Clip and download covariates ========================================
 # Obtain list of climatic variables
-assetname_clim <-  ee_manage_assetlist(path_asset = "projects/digital-soil-mapping-gsp-fao/assets/CHELSA")
+assetname<-  rbind(ee_manage_assetlist(path_asset = "projects/digital-soil-mapping-gsp-fao/assets/CHELSA"),
+ ee_manage_assetlist(path_asset = "projects/digital-soil-mapping-gsp-fao/assets/MODIS"),
+  ee_manage_assetlist(path_asset = "projects/digital-soil-mapping-gsp-fao/assets/LANDCOVER"),
+  ee_manage_assetlist(path_asset = "projects/digital-soil-mapping-gsp-fao/assets/OPENLANDMAP"))
+
+
 
 # Loop over the names of assets to clip and dowload the covariates
-for (i in unique(assetname_clim$ID)){
-  
-  region <-ee$FeatureCollection("projects/digital-soil-mapping-gsp-fao/assets/UN_BORDERS/BNDA_CTY")%>%
-    ee$FeatureCollection$filterMetadata('ISO3CD', 'equals', AOI)
-  region = region$geometry()
+for (i in unique(assetname$ID)){
+ 
   #Extract filename 
   filename <- sub('.*\\/', '', i)
   
@@ -116,7 +115,7 @@ for (i in unique(assetname_clim$ID)){
     image = image$resample('bilinear')$reproject(
     crs= crs,
     scale= res)
-    
+   
   
   #Export clipped covariate as raster
   raster <- ee_as_raster(
@@ -126,125 +125,9 @@ for (i in unique(assetname_clim$ID)){
     via = "drive",
     maxPixels = 1e+12
   )
-  r <- rast(raster)
-  r <- mask(r, aoi)
-  plot(r)
-  writeRaster(r, paste0(output_dir,filename, '.tif'), overwrite=T)
+
+  plot(raster)
+  writeRaster(raster, paste0(output_dir,filename, '.tif'), overwrite=T)
   print(paste(filename, 'exported successfully'))
 }
-
-# 7 - Clip and download vegetation layers ======================================
-#Obtain list of modis variables
-assetname_veg <-  ee_manage_assetlist(path_asset = "projects/digital-soil-mapping-gsp-fao/assets/MODIS")
-
-# Loop over the names of assets to clip and dowload the covariates
-for (i in unique(assetname_veg$ID)){
-  
-  region <-ee$FeatureCollection("projects/digital-soil-mapping-gsp-fao/assets/UN_BORDERS/BNDA_CTY")%>%
-    ee$FeatureCollection$filterMetadata('ISO3CD', 'equals', AOI)
-  region = region$geometry()
-  #Extract filename 
-  filename <- sub('.*\\/', '', i)
-  
-  #Clip image to the extent of the AOI
-  image <- ee$Image(i) %>%
-    ee$Image$clip(region)%>%
-    ee$Image$toFloat()
-  
-  # Resample to target resolution
-    image = image$resample('bilinear')$reproject(
-    crs= crs,
-    scale= res)
-  
-  #Export clipped covariate as raster
-  raster <- ee_as_raster(
-    image = image,
-    scale= res,
-    region = region,
-    via = "drive"
-  )
-  r <- rast(raster)
-  r <- mask(r, aoi)
-  plot(r)
-  writeRaster(r, paste0(output_dir,filename, '.tif'), overwrite=T)
-  print(paste(filename, 'exported successfully'))
-}
-
-
-# 8 - Clip and download land cover layers ======================================
-#Obtain list of landcover variables
-assetname_lc <-  ee_manage_assetlist(path_asset = "projects/digital-soil-mapping-gsp-fao/assets/LANDCOVER")
-
-# Loop over the names of assets to clip and dowload the covariates
-for (i in unique(assetname_lc$ID)){
-  
-  region <-ee$FeatureCollection("projects/digital-soil-mapping-gsp-fao/assets/UN_BORDERS/BNDA_CTY")%>%
-    ee$FeatureCollection$filterMetadata('ISO3CD', 'equals', AOI)
-  region = region$geometry()
-  #Extract filename 
-  filename <- sub('.*\\/', '', i)
-  
-  #Clip image to the extent of the AOI
-  image <- ee$Image(i) %>%
-    ee$Image$clip(region)%>%
-    ee$Image$toFloat()
-  
-  # # Resample to target resolution
-  #   image = image$resample('bilinear')$reproject(
-  #   crs= crs,
-  #   scale= res)
-  
-  #Export clipped covariate as raster
-  raster <- ee_as_raster(
-    image = image,
-    scale= res,
-    region = region,
-    via = "drive"
-  )
-  r <- rast(raster)
-  r <- mask(r, aoi)
-  plot(r)
-  writeRaster(r, paste0(output_dir,filename, '.tif'), overwrite=T)
-  print(paste(filename, 'exported successfully'))
-}
-
-# 9 - Clip and download terrain attribute layers ===============================
-#Obtain list of terrain attributes
-assetname_ta <-  ee_manage_assetlist(path_asset = "projects/digital-soil-mapping-gsp-fao/assets/OPENLANDMAP")
-
-# Loop over the names of assets to clip and download the covariates
-for (i in unique(assetname_ta$ID)){
-  
-  region <-ee$FeatureCollection("projects/digital-soil-mapping-gsp-fao/assets/UN_BORDERS/BNDA_CTY")%>%
-    ee$FeatureCollection$filterMetadata('ISO3CD', 'equals', AOI)
-  region = region$geometry()
-  #Extract filename 
-  filename <- sub('.*\\/', '', i)
-  
-  #Clip image to the extent of the AOI
-  image <- ee$Image(i) %>%
-    ee$Image$clip(region)%>%
-    ee$Image$toFloat()
-  
-  # # Resample to target resolution
-  #   image = image$resample('bilinear')$reproject(
-  #   crs= crs,
-  #   scale= res)
-  
-  #image =   image$unmask(0)
-  #Export clipped covariate as raster
-  raster <- ee_as_raster(
-    image = image,
-    scale= res,
-    region = region,
-    via = "drive"
-  )
-  r <- rast(raster)
-  r <- mask(r, aoi)
-  plot(r)
-  writeRaster(r, paste0(output_dir,filename, '.tif'), overwrite=T)
-  print(paste(filename, 'exported successfully'))
-}
-
-
 
