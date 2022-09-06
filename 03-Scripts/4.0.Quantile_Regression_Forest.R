@@ -26,8 +26,8 @@ gc()
 # 0 - Set working directory, soil attribute, and packages ======================
 
 # Working directory
-# wd <- 'C:/Users/luottoi/Documents/GitHub/Digital-Soil-Mapping'
-setwd('C:/Users/hp/Documents/GitHub/Digital-Soil-Mapping')
+wd <- 'C:/GIT/Digital-Soil-Mapping'
+setwd(wd)
 
 # Load Area of interest (shp)
 AOI <- '01-Data/MKD.shp'
@@ -36,7 +36,7 @@ AOI <- '01-Data/MKD.shp'
 soilatt <- 'ocs_0_30'
 
 # Function for Uncertainty Assessment
-load("03-Scripts/eval.RData")
+load(file = "03-Scripts/eval.RData")
 
 #load packages
 library(tidyverse)
@@ -53,7 +53,10 @@ library(doParallel)
 ## 1.1 - Load covariates -------------------------------------------------------
 files <- list.files(path= '01-Data/covs/', pattern = '.tif$', full.names = T)
 covs <- rast(files)
-ncovs <- names(covs)
+ncovs <- str_remove(files, "01-Data/covs/")
+ncovs <- str_remove(ncovs, ".tif")
+ncovs <- str_replace(ncovs, "-", "_")
+names(covs) <- ncovs 
 
 ## 1.2 - Load the soil data (Script 2) -----------------------------------------
 dat <- read_csv("02-Outputs/soil_data.csv")
@@ -83,7 +86,7 @@ fitControl <- rfeControl(functions = rfFuncs,
                          method = "repeatedcv",
                          number = 10,         ## 10 -fold CV
                          repeats = 3,        ## repeated 3 times
-                         verbose = TRUE,
+                         verboseIter = TRUE,
                          saveDetails = TRUE)
 
 # Set the regression function
@@ -98,12 +101,12 @@ registerDoParallel(cl)
 ## 2.2 - Calibrate a RFE model to select covariates ----------------------------
 covsel <- rfe(fm,
               data = d,  
-              sizes = 10:(length(d)-1),
+              sizes = seq(from=10, to=length(ncovs)-1, by = 5),
               rfeControl = fitControl,
               verbose = TRUE,
               keep.inbag = T)
 stopCluster(cl)
-covsel
+
 ## 2.3 - Plot selection of covariates ------------------------------------------
 trellis.par.set(caretTheme())
 plot(covsel, type = c("g", "o"))
@@ -142,10 +145,8 @@ gc()
 
 
 ## 3.4 - Extract predictor importance as relative values (%)
-model$importance <-
-  data.frame(var=rownames(arrange(x$importance, desc(Overall))),
-             arrange(x$importance, desc(Overall))) 
-
+x <- randomForest::importance(model$finalModel)
+model$importance <- x
 ## 3.5 - Print and save model --------------------------------------------------
 print(model)
 saveRDS(model, file = paste0("02-Outputs/models/model_",soilatt,".rds"))

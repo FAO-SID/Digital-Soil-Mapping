@@ -38,7 +38,7 @@ library(readxl) # for importing excel files
 library(mapview) # for seeing the profiles in a map
 library(sf) # to manage spatial data (shp vectors) 
 library(aqp) # for soil profile data
-# require("devtools") 
+# install.packages("devtools") 
 # devtools::install_bitbucket("brendo1001/ithir/pkg") #install ithir package
 library(ithir) # for horizon harmonization
 
@@ -214,8 +214,8 @@ legend("topleft",legend = c("Original", "Original+Estimated"),
 # Carbon content higher than 15% is only typical for organic soil (histosols)
 # We will remove all atypically high SOC as outliers
 summary(dat$soc)
-na.omit(dat$ProfID[dat$soc>15])
-dat <- dat[dat$ProfID!= "P4601",]
+na.omit(dat$ProfID[dat$soc > 15])
+dat <- dat[dat$ProfID != "P4601",]
 
 # Explore bulk density data, identify outliers
 # remove layers with Bulk Density < 1 g/cm^3
