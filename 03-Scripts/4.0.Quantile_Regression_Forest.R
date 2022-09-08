@@ -86,8 +86,9 @@ fitControl <- rfeControl(functions = rfFuncs,
                          method = "repeatedcv",
                          number = 10,         ## 10 -fold CV
                          repeats = 3,        ## repeated 3 times
-                         verboseIter = TRUE,
-                         saveDetails = TRUE)
+                         verbose = TRUE,
+                         saveDetails = TRUE, 
+                         returnResamp = "all")
 
 # Set the regression function
 fm = as.formula(paste(soilatt," ~", paste0(ncovs,
@@ -112,7 +113,7 @@ trellis.par.set(caretTheme())
 plot(covsel, type = c("g", "o"))
 
 # Extract selection of covariates and subset covs
-opt_covs <- covsel$optVariables 
+opt_covs <- predictors(covsel)[1:55]
 
 # 3 - QRF Model calibration ====================================================
 ## 3.1 - Update formula with the selected covariates ---------------------------
@@ -129,7 +130,8 @@ fitControl <- trainControl(method = "repeatedcv",
                            savePredictions = TRUE)
 
 # Tune mtry hyperparameters
-tuneGrid <-  expand.grid(mtry = c(500))
+mtry <- round(length(opt_covs)/3)
+tuneGrid <-  expand.grid(mtry = c(mtry-5, mtry, mtry+5))
 
 ## 3.3 - Calibrate the QRF model -----------------------------------------------
 model <- caret::train(fm,
@@ -159,8 +161,8 @@ df <- data.frame(o,p)
 
 ## 4.1 - Plot and save scatterplot --------------------------------------------- 
 (g1 <- ggplot(df, aes(x = o, y = p)) + 
-  geom_abline(slope = 1, intercept = 0, color = "red")+
-  geom_point(alpha = 0.2) + 
+  geom_point(alpha = 0.1) + 
+   geom_abline(slope = 1, intercept = 0, color = "red")+
   ylim(c(min(o), max(o))) + theme(aspect.ratio=1)+ 
   labs(title = soilatt) + 
   xlab("Observed") + ylab("Predicted"))
