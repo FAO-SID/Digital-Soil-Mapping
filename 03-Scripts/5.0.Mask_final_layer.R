@@ -1,6 +1,7 @@
 #######################################################
 #
-#  Mask our waterbodies
+#  Mask out waterbodies
+#  and visualize maps
 #
 # GSP-Secretariat
 # Contact: Isabel.Luotto@fao.org
@@ -16,14 +17,14 @@ gc()
 #  User defined variables:
 
 # Working directory
-#wd <- 'C:/Users/luottoi/Documents/GitHub/Digital-Soil-Mapping'
-wd <- 'C:/Users/hp/Documents/GitHub/Digital-Soil-Mapping'
+wd <- 'C:/Users/luottoi/Documents/GitHub/Digital-Soil-Mapping'
+#wd <- 'C:/Users/hp/Documents/GitHub/Digital-Soil-Mapping'
 
 
 
 # Area of interest
 AOI <- '01-Data/MKD.shp'
-# GEE Resolution (CRS defined based on the first TerraClimate layer WGS84 )
+# GEE Resolution 
 res = 250
 
 soilatt <- 'ocs_0_30'
