@@ -100,9 +100,11 @@ assetname<-  rbind(ee_manage_assetlist(path_asset = "projects/digital-soil-mappi
 
 
 
+assetname$num <- 1:nrow(assetname)
+
 # Loop over the names of assets to clip and dowload the covariates
 for (i in unique(assetname$ID)){
- 
+  
   #Extract filename 
   filename <- sub('.*\\/', '', i)
   
@@ -112,10 +114,10 @@ for (i in unique(assetname$ID)){
     ee$Image$toFloat()
   
   # Resample to target resolution
-    image = image$resample('bilinear')$reproject(
+  image = image$resample('bilinear')$reproject(
     crs= crs,
     scale= res)
-   
+  
   
   #Export clipped covariate as raster
   raster <- ee_as_raster(
@@ -125,9 +127,12 @@ for (i in unique(assetname$ID)){
     via = "drive",
     maxPixels = 1e+12
   )
-
+  
   plot(raster)
+  
+  num <- assetname[assetname$ID == i, 'num']
+  
   writeRaster(raster, paste0(output_dir,filename, '.tif'), overwrite=T)
-  print(paste(filename, 'exported successfully'))
+  print(paste(filename, 'exported successfully - Covariate',num, 'out of 68'))
 }
 
