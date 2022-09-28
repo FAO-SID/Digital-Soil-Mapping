@@ -33,7 +33,7 @@ gc()
 # 0 - User-defined variables ===================================================
 # Working directory
 wd <- 'C:/Users/luottoi/Documents/GitHub/Digital-Soil-Mapping'
-#wd <- 'C:/Users/hp/Documents/GitHub/Digital-Soil-Mapping'
+#wd <- 'C:/GIT/Digital-Soil-Mapping'
 
 # Output covariate folder
 #output_dir <-''
@@ -41,8 +41,8 @@ output_dir <-'01-Data/covs/'
 
 # Area of interest: either own shapefile or 3-digit ISO code to extract from 
 # UN 2020 boundaries
-#AOI <- '01-Data/MKD.shp'
-AOI <- 'MKD'
+AOI <- '01-Data/buenos_aires.shp'
+# AOI <- 'MKD'
 # Resolution and projection
 res = 250
 crs = "EPSG:4326"
@@ -59,10 +59,10 @@ library(rgee)
 
 
 # 2 - Import shapefile =========================================================
-#AOI <- read_sf(AOI)
+AOI <- read_sf(AOI)
 # convert AOI to a box polygon
-#AOI <- st_as_sfc(st_bbox(AOI))
-#AOI <- st_as_sf(AOI)
+AOI <- st_as_sfc(st_bbox(AOI))
+AOI <- st_as_sf(AOI)
 
 
 # 3 - Overview of covariates ===================================================
@@ -79,13 +79,13 @@ ee_Initialize()
 
 # 5 - Upload shapefile to GEE OR use uploaded UN borders =======================
 ## 5.1 Convert shp to gee geometry ---------------------------------------------
-#region <- sf_as_ee(AOI)
-#region = region$geometry()
+region <- sf_as_ee(AOI)
+region = region$geometry()
 
 ## 5.2 Extract from UN 2020 map using ISO code ---------------------------------
-region <-ee$FeatureCollection("projects/digital-soil-mapping-gsp-fao/assets/UN_BORDERS/BNDA_CTY")%>%
-  ee$FeatureCollection$filterMetadata('ISO3CD', 'equals', AOI)
-region = region$geometry()
+# region <-ee$FeatureCollection("projects/digital-soil-mapping-gsp-fao/assets/UN_BORDERS/BNDA_CTY")%>%
+#   ee$FeatureCollection$filterMetadata('ISO3CD', 'equals', AOI)
+# region = region$geometry()
 # AOI_shp <-ee_as_sf(region)
 # AOI_shp <- st_collection_extract(AOI_shp, "POLYGON")
 # write_sf(AOI_shp, paste0('01-Data/',AOI,'.shp'))
