@@ -29,7 +29,7 @@ gc()
 setwd('C:/GIT/Digital-Soil-Mapping')
 
 # Load Area of interest (shp)
-AOI <- '01-Data/buenos_aires.shp'
+AOI <- '01-Data/Mexico/AOI.shp'
 
 # Terget soil attribute
 soilatt <- 'p_bray'
@@ -50,10 +50,14 @@ library(mapview)
 
 # 1 - Merge soil data with environmental covariates ============================
 
-val_data <- read_csv("01-Data/data_with_coord.csv") %>% 
+val_data <- read_csv("01-Data/Mexico/p_bray_data_coord.csv") %>% 
   vect(geom=c("x", "y"), crs = "epsg:4326")
 
-covs <- rast("01-Data/covs/covs.tif")
+f <- list.files("01-Data/covs/", ".tif$", full.names = TRUE) 
+# covs <- rast("01-Data/covs/covs.tif")
+f <- f[f !="01-Data/covs/covs.tif"]
+
+covs <- rast(f)
 ncovs <- names(covs)
 
 ex <- terra::extract(x = covs, y = val_data, xy=F)
@@ -84,19 +88,23 @@ val_data <- na.omit(val_data)
 # Convert soil data into a spatial object (check https://epsg.io/6204)
 
 df <- NULL
-dat <- read_csv("01-Data/sim_data_no_coord.csv")
+dat <- read_csv("01-Data/Mexico/p_bray_data_coord.csv")
+
 N <- dat %>% group_by(stratum) %>% summarise(N=n())
+N <- N[N$N != 1,]
 
 for (i in 1:50) {
-  stratum <- rast("01-Data/land cover/SE_districts_croplands.tif")
+  stratum <- rast("01-Data/Mexico/strata.tif")
   names(stratum) <- "stratum"
+  stratum[stratum$stratum %in% c(4,6,7)] <- NaN
   
   y <- freq(stratum)
   
   x <- spatSample(x = stratum, max(N$N), method = "stratified", as.df=T, xy=T, replace=F)
   table(x$stratum)
+  x <- x[x$stratum %in% N$stratum,]
   
-  dat <- read_csv("01-Data/sim_data_no_coord.csv")
+  dat <- read_csv("01-Data/Mexico/p_bray_data_coord.csv")
   
   strata <- unique(x$stratum)
   d <- NULL
@@ -209,7 +217,7 @@ for (i in 1:50) {
   
   # 4 - Uncertainty assessment ===================================================
   # extract observed and predicted values
-  o <- val_data$p
+  o <- val_data[,soilatt]
   p <- predict(model$finalModel, val_data, what = mean)
   df <- rbind(df, data.frame(o,p, iteration=i))
   
@@ -242,7 +250,7 @@ write_csv(df, paste("residuals_",soilatt,".csv"))
 # Generation of maps (prediction of soil attributes) 
 ## 5.1 - Produce tiles ---------------------------------------------------------
 r <-covs[[1]]
-t <- rast(nrows = 5, ncols = 5, extent = ext(r), crs = crs(r))
+t <- rast(nrows = 3, ncols = 8, extent = ext(r), crs = crs(r))
 tile <- makeTiles(r, t,overwrite=TRUE,filename="02-Outputs/tiles/tiles.tif")
 
 ## 5.2 - Predict soil attributes per tiles -------------------------------------
@@ -282,7 +290,7 @@ for (j in seq_along(tile)) {
 }
 
 ## 5.3 - Merge tiles both prediction and st.Dev --------------------------------
-for (j in 1:25) {
+for (j in 1:24) {
   f_mean <- list.files(path = "02-Outputs/tiles/soilatt_tiles/", 
                        pattern = paste0(soilatt,"_tile_",j,"_model_"), full.names = TRUE)
   f_sd <- list.files(path = "02-Outputs/tiles/soilatt_tiles/", 
