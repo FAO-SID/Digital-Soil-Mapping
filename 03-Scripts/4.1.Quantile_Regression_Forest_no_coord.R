@@ -32,7 +32,7 @@ setwd('C:/GIT/Digital-Soil-Mapping')
 AOI <- '01-Data/Mexico/AOI.shp'
 
 # Terget soil attribute
-soilatt <- 'p_bray'
+soilatt <- 'k'
 
 # Function for Uncertainty Assessment
 load(file = "03-Scripts/eval.RData")
@@ -59,6 +59,8 @@ f <- f[f !="01-Data/covs/covs.tif"]
 
 covs <- rast(f)
 ncovs <- names(covs)
+ncovs <- str_replace(ncovs, "-", "_")
+names(covs) <- ncovs
 
 ex <- terra::extract(x = covs, y = val_data, xy=F)
 val_data <- as.data.frame(val_data)
@@ -305,25 +307,18 @@ for (j in 1:24) {
               filename = paste0("02-Outputs/tiles/aggregated_tiles/",
                                 soilatt,"_tilesd_", j,".tif"), 
               overwrite = TRUE)
-  writeRaster(q05, 
+  writeRaster(pred_mean, 
               filename = paste0("02-Outputs/tiles/aggregated_tiles/",
-                                soilatt,"_tileq05_", j,".tif"), 
+                                soilatt,"_tileMean_", j,".tif"), 
               overwrite = TRUE)
-  writeRaster(q50, 
-              filename = paste0("02-Outputs/tiles/aggregated_tiles/",
-                                soilatt,"_tileq50_", j,".tif"), 
-              overwrite = TRUE)
-  writeRaster(q95, 
-              filename = paste0("02-Outputs/tiles/aggregated_tiles/",
-                                soilatt,"_tileq95_", j,".tif"), 
-              overwrite = TRUE)
+  print(j)
 }
 
-name_tiles <- c("sd_", "q05_","q50_", "q95_")
+name_tiles <- c("sd", "Mean")
 
 for (i in seq_along(name_tiles)) {
   f <- list.files(path = "02-Outputs/tiles/aggregated_tiles/", 
-                  pattern = name_tiles[i], full.names = TRUE)
+                  pattern = paste0(soilatt,"_tile",name_tiles[i]), full.names = TRUE)
   r <- list()
   for (g in seq_along(f)){
     r[[g]] <- rast(f[g])
@@ -338,63 +333,68 @@ for (i in seq_along(name_tiles)) {
   gc()
 }
 
-val_data <- read_csv("01-Data/data_with_coord.csv") %>% 
+val_data <- read_csv("01-Data/Mexico/p_bray_data_coord.csv") %>% 
   vect(geom=c("x", "y"), crs = "epsg:4326")
 
-q50 <- rast("02-Outputs/maps/p_tileq50.tif")
-
-ex <- terra::extract(x = q50, y = val_data, xy=F, ID=FALSE)
+pred_mean <- rast("02-Outputs/maps/kMean.tif")
+plot(pred_mean)
+ex <- terra::extract(x = pred_mean, y = val_data, xy=F, ID=FALSE)
 val_data <- as.data.frame(val_data)
 val_data <- cbind(val_data, ex)
 val_data <- na.omit(val_data)
 
-eval(val_data$q0.50,val_data$p)
+eval(val_data$mean,val_data[,soilatt])
 
 ##############################
 
-v <- st_read("01-Data/AOI_Arg.shp")
-names(v)[5] <- "stratum"
-darea <- readxl::read_excel("01-Data/data_without_coord.xls")
-darea <-  darea %>% 
-  select(stratum=code, median)
-darea$stratum <- as.numeric(darea$stratum)
-v <- left_join(v, darea)
-v <- vect(v)
-names(v)[8] <- "p"
-plot(v, "p")
-r <- rast("01-Data/land cover/SE_croplands.tif")
-r <- rasterize(v,r,field="p")
-plot(r)
-val_data <- read_csv("01-Data/data_with_coord.csv") %>% 
-  vect(geom=c("x", "y"), crs = "epsg:4326")
-
-val_data$pred <- terra::extract(r, val_data, ID=FALSE)[[1]]
-
-val <- val_data %>% as.data.frame() %>% na.omit()
-
-eval(val$pred, val$p)
+# v <- st_read("01-Data/Mexico/AOI.shp")
+# names(v)[5] <- "stratum"
+# darea <- readxl::read_excel("01-Data/data_without_coord.xls")
+# darea <-  darea %>% 
+#   select(stratum=code, median)
+# darea$stratum <- as.numeric(darea$stratum)
+# v <- left_join(v, darea)
+# v <- vect(v)
+# names(v)[8] <- "p"
+# plot(v, "p")
+# r <- rast("01-Data/land cover/SE_croplands.tif")
+# r <- rasterize(v,r,field="p")
+# plot(r)
+# val_data <- read_csv("01-Data/data_with_coord.csv") %>% 
+#   vect(geom=c("x", "y"), crs = "epsg:4326")
+# 
+# val_data$pred <- terra::extract(r, val_data, ID=FALSE)[[1]]
+# 
+# val <- val_data %>% as.data.frame() %>% na.omit()
+# 
+# eval(val$pred, val$p)
 
 ##################
 
 
-val_data <- read_csv("01-Data/data_with_coord.csv") %>% 
+val_data <- read_csv("01-Data/Mexico/p_bray_data_coord.csv") %>% 
   vect(geom=c("x", "y"), crs = "epsg:4326")
 
-covs <- rast("01-Data/covs/covs.tif")
-psd <- rast("02-Outputs/maps/p_tileSD.tif")
-p05 <- rast("02-Outputs/maps/p_tileq05.tif")
-p50 <- rast("02-Outputs/maps/p_tileq50.tif")
-p95 <- rast("02-Outputs/maps/p_tileq95.tif")
-covs <- c(covs, psd, p05, p50, p95)
+
+f <- list.files("01-Data/covs/", ".tif$", full.names = TRUE) 
+# covs <- rast("01-Data/covs/covs.tif")
+f <- f[f !="01-Data/covs/covs.tif"]
+
+covs <- rast(f)
+psd <- rast("02-Outputs/maps/p_braysd_.tif")
+pmean <- rast("02-Outputs/maps/p_brayMean_.tif")
+covs <- c(covs, psd, pmean)
 
 ncovs <- names(covs)
+ncovs <- str_replace(ncovs, "-", "_")
+names(covs) <- ncovs
 
 ex <- terra::extract(x = covs, y = val_data, xy=F)
 val_data <- as.data.frame(val_data)
 val_data <- cbind(val_data, ex)
 val_data <- na.omit(val_data)
 
-plot(covs[[71]])
+plot(covs[[69]])
 
 ## 1.4 - Target soil attribute + covariates ------------------------------------
 d <- select(val_data, soilatt, ncovs)
@@ -435,7 +435,7 @@ trellis.par.set(caretTheme())
 plot(covsel, type = c("g", "o"))
 
 # Extract selection of covariates and subset covs
-opt_covs <- predictors(covsel)[1:65]
+opt_covs <- predictors(covsel)[1:60]
 
 # 3 - QRF Model calibration ====================================================
 ## 3.1 - Update formula with the selected covariates ---------------------------
@@ -507,7 +507,7 @@ dev.off()
 # Generation of maps (prediction of soil attributes) 
 ## 5.1 - Produce tiles ---------------------------------------------------------
 r <-covs[[1]]
-t <- rast(nrows = 5, ncols = 5, extent = ext(r), crs = crs(r))
+t <- rast(nrows = 3, ncols = 8, extent = ext(r), crs = crs(r))
 tile <- makeTiles(r, t,overwrite=TRUE,filename="02-Outputs/tiles/tiles.tif")
 
 ## 5.2 - Predict soil attributes per tiles -------------------------------------
@@ -520,12 +520,12 @@ for (j in seq_along(tile)) {
   
   
   # plot(r)# 
-  pred_mean <- terra::predict(covst, model = model$finalModel, na.rm=TRUE,  
-                              cpkgs="quantregForest", what=mean)
+  meanFunc = function(x) mean(x, na.rm=TRUE)
+  pred_mean <- terra::predict(covst, model = model$finalModel, na.rm = TRUE,   
+                              cpkgs="quantregForest", what=meanFunc)
+  sdFunc = function(x) sd(x, na.rm=TRUE)
   pred_sd <- terra::predict(covst, model = model$finalModel, na.rm=TRUE,  
-                            cpkgs="quantregForest", what=sd)  
-  
-  
+                            cpkgs="quantregForest", what=sdFunc)  
   
   # ###### Raster package solution (in case terra results in many NA pixels)
   # library(raster)
