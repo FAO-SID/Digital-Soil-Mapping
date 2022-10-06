@@ -41,7 +41,7 @@ output_dir <-'01-Data/covs/'
 
 # Area of interest: either own shapefile or 3-digit ISO code to extract from 
 # UN 2020 boundaries
-AOI <- '01-Data/buenos_aires.shp'
+AOI <- '01-Data/Mexico/AOI.shp'
 # AOI <- 'MKD'
 # Resolution and projection
 res = 250
