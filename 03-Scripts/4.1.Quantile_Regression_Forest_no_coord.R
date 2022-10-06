@@ -371,6 +371,7 @@ eval(val_data$mean,val_data[,soilatt])
 
 ##################
 
+# Second part - model data with coordinates ####################################
 
 val_data <- read_csv("01-Data/Mexico/p_bray_data_coord.csv") %>% 
   vect(geom=c("x", "y"), crs = "epsg:4326")
@@ -381,8 +382,8 @@ f <- list.files("01-Data/covs/", ".tif$", full.names = TRUE)
 f <- f[f !="01-Data/covs/covs.tif"]
 
 covs <- rast(f)
-psd <- rast("02-Outputs/maps/p_braysd_.tif")
-pmean <- rast("02-Outputs/maps/p_brayMean_.tif")
+psd <- rast("02-Outputs/maps/ksd.tif")
+pmean <- rast("02-Outputs/maps/kMean.tif")
 covs <- c(covs, psd, pmean)
 
 ncovs <- names(covs)
@@ -394,7 +395,7 @@ val_data <- as.data.frame(val_data)
 val_data <- cbind(val_data, ex)
 val_data <- na.omit(val_data)
 
-plot(covs[[69]])
+plot(covs[[70]])
 
 ## 1.4 - Target soil attribute + covariates ------------------------------------
 d <- select(val_data, soilatt, ncovs)
@@ -435,7 +436,7 @@ trellis.par.set(caretTheme())
 plot(covsel, type = c("g", "o"))
 
 # Extract selection of covariates and subset covs
-opt_covs <- predictors(covsel)[1:60]
+opt_covs <- predictors(covsel)[1:45]
 
 # 3 - QRF Model calibration ====================================================
 ## 3.1 - Update formula with the selected covariates ---------------------------
